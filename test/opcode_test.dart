@@ -80,8 +80,7 @@ void main() {
     expect(chip8.registers.getUint8(11), (0xCD + 0xDE) & 0x00FF);
     expect(chip8.registers.getUint8(15), 0x01);
   });
-  test(
-      '8XY5 - VY is subtracted from VX, VF is set to 0 when theres a borrow, and 1 when there isnt',
+  test('8XY5 - VY subtracted from VX, VF is set to 0 when borrow, 1 otherwise',
       () {
     final chip8 = Chip8();
     chip8.executeOpcode(0x6045); // store 0x45 in V0
@@ -93,6 +92,18 @@ void main() {
     chip8.executeOpcode(0x6CDE); // store 0xDE in V12
     chip8.executeOpcode(0x8BC5); // store V11 - V12 in V11
     expect(chip8.registers.getUint8(11), (0xCD - 0xDE) & 0x00FF);
+    expect(chip8.registers.getUint8(15), 0);
+  });
+  test('8XY6 - stores the VX least significant bit in VF, shifts VX right by 1',
+      () {
+    final chip8 = Chip8();
+    chip8.executeOpcode(0x6045); // store 0x45 in V0
+    chip8.executeOpcode(0x8006); // stores and bit shifts
+    expect(chip8.registers.getUint8(0), 0x45 >> 1);
+    expect(chip8.registers.getUint8(15), 1);
+    chip8.executeOpcode(0x6BCE); // store 0xCD in V11
+    chip8.executeOpcode(0x8B06); // stores and bit shifts
+    expect(chip8.registers.getUint8(11), 0xCE >> 1);
     expect(chip8.registers.getUint8(15), 0);
   });
 }

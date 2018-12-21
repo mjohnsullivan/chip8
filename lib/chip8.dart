@@ -112,6 +112,13 @@ class Chip8 {
           setRegister(xRegisterNr, subtractedValue);
           setRegister(0xF, subtractedValue >= 0 ? 1 : 0);
           return;
+        case 6:
+          // 8XY6 - stores the least significant bit of VX in VF and then shifts VX to the right by 1
+          final vx = secondSignificantNibble(opcode);
+          final xValue = getRegister(vx);
+          setRegister(0xF, xValue & 0x1);
+          setRegister(vx, xValue >> 1);
+          return;
       }
     }
   }

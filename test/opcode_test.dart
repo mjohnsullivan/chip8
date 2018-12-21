@@ -45,4 +45,26 @@ void main() {
     chip8.executeOpcode(0x8BC1); // store V11 | V12 in V11
     expect(chip8.registers.getUint16(22), 0xCD | 0xDE);
   });
+  test('8XY2 sets VX to the value of VX AND VY', () {
+    final chip8 = Chip8();
+    chip8.executeOpcode(0x6023); // store 0x23 in V0
+    chip8.executeOpcode(0x6145); // store 0x45 in V1
+    chip8.executeOpcode(0x8012); // store V0 | V1 in V0
+    expect(chip8.registers.getUint16(0), 0x23 & 0x45);
+    chip8.executeOpcode(0x6BCD); // store 0xCD in V11
+    chip8.executeOpcode(0x6CDE); // store 0xDE in V12
+    chip8.executeOpcode(0x8BC2); // store V11 | V12 in V11
+    expect(chip8.registers.getUint16(22), 0xCD & 0xDE);
+  });
+  test('8XY3 sets VX to the value of VX XOR VY', () {
+    final chip8 = Chip8();
+    chip8.executeOpcode(0x6023); // store 0x23 in V0
+    chip8.executeOpcode(0x6145); // store 0x45 in V1
+    chip8.executeOpcode(0x8013); // store V0 | V1 in V0
+    expect(chip8.registers.getUint16(0), 0x23 ^ 0x45);
+    chip8.executeOpcode(0x6BCD); // store 0xCD in V11
+    chip8.executeOpcode(0x6CDE); // store 0xDE in V12
+    chip8.executeOpcode(0x8BC3); // store V11 | V12 in V11
+    expect(chip8.registers.getUint16(22), 0xCD ^ 0xDE);
+  });
 }

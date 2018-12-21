@@ -80,6 +80,20 @@ class Chip8 {
           final yValue = getRegister(yRegisterNr);
           setRegister(xRegisterNr, xValue | yValue);
           return;
+        case 2: // 8XY2 - Sets VX to VX and VY (Bitwise AND operation)
+          final xRegisterNr = secondSignificantNibble(opcode);
+          final yRegisterNr = thirdSignificantNibble(opcode);
+          final xValue = getRegister(xRegisterNr);
+          final yValue = getRegister(yRegisterNr);
+          setRegister(xRegisterNr, xValue & yValue);
+          return;
+        case 3: // 8XY3 - Sets VX to VX xor VY (Bitwise XOR operation)
+          final xRegisterNr = secondSignificantNibble(opcode);
+          final yRegisterNr = thirdSignificantNibble(opcode);
+          final xValue = getRegister(xRegisterNr);
+          final yValue = getRegister(yRegisterNr);
+          setRegister(xRegisterNr, xValue ^ yValue);
+          return;
       }
     }
   }

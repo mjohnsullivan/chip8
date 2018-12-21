@@ -1,0 +1,15 @@
+name: chip8
+version: 0.0.1
+description: >-
+  A Chip-8 emulator in Dart
+author: Matt Sullivan <matt.j.sullivan@gmail.com>
+homepage: https://github.com/mjohnsullivan/chip8
+
+environment:
+  sdk: '>=2.0.0 <3.0.0'
+
+dependencies:
+  
+  
+dev_dependencies:
+  test: ^1.5.1

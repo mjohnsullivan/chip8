@@ -25,4 +25,13 @@ void main() {
     chip8.executeOpcode(0x7FAA);
     expect(chip8.registers.getUint16(30), 0xED + 0xAA);
   });
+  test('8XY0 sets VX to the value of VY', () {
+    final chip8 = Chip8();
+    chip8.executeOpcode(0x6023); // store 0x23 in V0
+    chip8.executeOpcode(0x8100); // move value in V0 to V1
+    expect(chip8.registers.getUint16(2), 0x23);
+    chip8.executeOpcode(0x6BCD); // store 0xCD in V11
+    chip8.executeOpcode(0x88B0); // move value in V11 to V8
+    expect(chip8.registers.getUint16(16), 0xCD);
+  });
 }

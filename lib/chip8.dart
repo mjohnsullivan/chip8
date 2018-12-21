@@ -65,6 +65,17 @@ class Chip8 {
       setRegister(registerNr, value + registerValue);
       return;
     }
+    if (mostSignificantNibble(opcode) == 8) {
+      final op = leastSignificantNibble(opcode);
+      switch (op) {
+        case 0:
+          // 8XY0 - Sets VX to the value of VY
+          final xRegisterNr = secondSignificantNibble(opcode);
+          final yRegisterNr = thirdSignificantNibble(opcode);
+          setRegister(xRegisterNr, getRegister(yRegisterNr));
+          return;
+      }
+    }
   }
 }
 
@@ -82,7 +93,19 @@ int secondSignificantNibble(final int word) {
   return shiftedWord;
 }
 
+/// Returns the value of the 3nd most significant nibble from a word
+int thirdSignificantNibble(final int word) {
+  final clearedWord = word & 0x00F0;
+  final shiftedWord = clearedWord >> 4;
+  return shiftedWord;
+}
+
 /// Returns the value of the least significant byte from a word
 int leastSignificantByte(final int word) {
   return word & 0x00FF;
+}
+
+/// Returns the value of the least significant nibble from a word
+int leastSignificantNibble(final int word) {
+  return word & 0x000F;
 }

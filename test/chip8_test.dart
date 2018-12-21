@@ -6,9 +6,9 @@ void main() {
     final chip8 = Chip8();
     expect(chip8.opcodes.lengthInBytes, 35 * 2);
   });
-  test('Chip8 has 16 registers, of two bytes in size', () {
+  test('Chip8 has 16 registers, each a byte in size', () {
     final chip8 = Chip8();
-    expect(chip8.registers.lengthInBytes, 16 * 2);
+    expect(chip8.registers.lengthInBytes, 16);
   });
   test('Chip8 has 4k of memory', () {
     final chip8 = Chip8();

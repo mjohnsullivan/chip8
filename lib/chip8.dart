@@ -9,7 +9,7 @@ class Chip8 {
   final opcodes = ByteData.view(Uint16List(35).buffer);
 
   // 16 registers; 15 general and 16th for carry flag
-  final ByteData registers = ByteData.view(Uint16List(16).buffer);
+  final ByteData registers = ByteData.view(Uint8List(16).buffer);
 
   // Index register, 12 bits in size
   int indexRegister;
@@ -43,11 +43,11 @@ class Chip8 {
 
   /// Sets a register value, registers numbering from 0..15
   void setRegister(int register, int value) {
-    registers.setUint16(register * 2, value);
+    registers.setUint8(register, value);
   }
 
   /// Gets the value from a register, registers numbering 0..15
-  int getRegister(int register) => registers.getUint16(register * 2);
+  int getRegister(int register) => registers.getUint8(register);
 
   /// Executes an opcode
   void executeOpcode(int opcode) {
@@ -94,6 +94,14 @@ class Chip8 {
           final yValue = getRegister(yRegisterNr);
           setRegister(xRegisterNr, xValue ^ yValue);
           return;
+        case 4: // 8XY4 - Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
+          final xRegisterNr = secondSignificantNibble(opcode);
+          final yRegisterNr = thirdSignificantNibble(opcode);
+          final xValue = getRegister(xRegisterNr);
+          final yValue = getRegister(yRegisterNr);
+          final addedValue = xValue + yValue;
+          setRegister(xRegisterNr, addedValue);
+          setRegister(0xF, addedValue > 0xFFFF ? 1 : 0);
       }
     }
   }

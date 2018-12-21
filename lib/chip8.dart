@@ -119,6 +119,16 @@ class Chip8 {
           setRegister(0xF, xValue & 0x1);
           setRegister(vx, xValue >> 1);
           return;
+        case 7:
+          // 8XY7 - sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't
+          final xRegisterNr = secondSignificantNibble(opcode);
+          final yRegisterNr = thirdSignificantNibble(opcode);
+          final xValue = getRegister(xRegisterNr);
+          final yValue = getRegister(yRegisterNr);
+          final subtractedValue = yValue - xValue;
+          setRegister(xRegisterNr, subtractedValue);
+          setRegister(0xF, subtractedValue >= 0 ? 1 : 0);
+          return;
       }
     }
   }

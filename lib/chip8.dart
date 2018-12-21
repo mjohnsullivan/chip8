@@ -68,11 +68,17 @@ class Chip8 {
     if (mostSignificantNibble(opcode) == 8) {
       final op = leastSignificantNibble(opcode);
       switch (op) {
-        case 0:
-          // 8XY0 - Sets VX to the value of VY
+        case 0: // 8XY0 - Sets VX to the value of VY
           final xRegisterNr = secondSignificantNibble(opcode);
           final yRegisterNr = thirdSignificantNibble(opcode);
           setRegister(xRegisterNr, getRegister(yRegisterNr));
+          return;
+        case 1: // 8XY1 - Sets VX to VX or VY (Bitwise OR operation)
+          final xRegisterNr = secondSignificantNibble(opcode);
+          final yRegisterNr = thirdSignificantNibble(opcode);
+          final xValue = getRegister(xRegisterNr);
+          final yValue = getRegister(yRegisterNr);
+          setRegister(xRegisterNr, xValue | yValue);
           return;
       }
     }

@@ -120,4 +120,16 @@ void main() {
     expect(chip8.registers.getUint8(11), 0xDE - 0xCD);
     expect(chip8.registers.getUint8(15), 1);
   });
+  test('8XYE - stores the VX most significant bit in VF, shifts VX left by 1',
+      () {
+    final chip8 = Chip8();
+    chip8.executeOpcode(0x6045); // store 0x45 in V0
+    chip8.executeOpcode(0x800E); // stores and bit shifts
+    expect(chip8.registers.getUint8(0), (0x45 << 1) & 0xFF);
+    expect(chip8.registers.getUint8(15), 0);
+    chip8.executeOpcode(0x6BCE); // store 0x12 in V11
+    chip8.executeOpcode(0x8B0E); // stores and bit shifts
+    expect(chip8.registers.getUint8(11), (0xCE << 1) & 0xFF);
+    expect(chip8.registers.getUint8(15), 1);
+  });
 }

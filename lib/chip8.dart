@@ -94,14 +94,24 @@ class Chip8 {
           final yValue = getRegister(yRegisterNr);
           setRegister(xRegisterNr, xValue ^ yValue);
           return;
-        case 4: // 8XY4 - Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't.
+        case 4: // 8XY4 - Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't
           final xRegisterNr = secondSignificantNibble(opcode);
           final yRegisterNr = thirdSignificantNibble(opcode);
           final xValue = getRegister(xRegisterNr);
           final yValue = getRegister(yRegisterNr);
           final addedValue = xValue + yValue;
           setRegister(xRegisterNr, addedValue);
-          setRegister(0xF, addedValue > 0xFFFF ? 1 : 0);
+          setRegister(0xF, addedValue > 0xFF ? 1 : 0);
+          return;
+        case 5: // 8XY5 - VY is subtracted from VX, VF is set to 0 when there's a borrow, and 1 when there isn't
+          final xRegisterNr = secondSignificantNibble(opcode);
+          final yRegisterNr = thirdSignificantNibble(opcode);
+          final xValue = getRegister(xRegisterNr);
+          final yValue = getRegister(yRegisterNr);
+          final subtractedValue = xValue - yValue;
+          setRegister(xRegisterNr, subtractedValue);
+          setRegister(0xF, subtractedValue >= 0 ? 1 : 0);
+          return;
       }
     }
   }

@@ -71,11 +71,28 @@ void main() {
     final chip8 = Chip8();
     chip8.executeOpcode(0x6023); // store 0x23 in V0
     chip8.executeOpcode(0x6145); // store 0x45 in V1
-    chip8.executeOpcode(0x8013); // store V0 | V1 in V0
-    expect(chip8.registers.getUint8(0), 0x23 ^ 0x45);
+    chip8.executeOpcode(0x8014); // store V0 + V1 in V0
+    expect(chip8.registers.getUint8(0), 0x23 + 0x45);
+    expect(chip8.registers.getUint8(15), 0x00);
     chip8.executeOpcode(0x6BCD); // store 0xCD in V11
     chip8.executeOpcode(0x6CDE); // store 0xDE in V12
-    chip8.executeOpcode(0x8BC3); // store V11 | V12 in V11
-    expect(chip8.registers.getUint8(11), 0xCD ^ 0xDE);
+    chip8.executeOpcode(0x8BC4); // store V11 + V12 in V11
+    expect(chip8.registers.getUint8(11), (0xCD + 0xDE) & 0x00FF);
+    expect(chip8.registers.getUint8(15), 0x01);
+  });
+  test(
+      '8XY5 - VY is subtracted from VX, VF is set to 0 when theres a borrow, and 1 when there isnt',
+      () {
+    final chip8 = Chip8();
+    chip8.executeOpcode(0x6045); // store 0x45 in V0
+    chip8.executeOpcode(0x6123); // store 0x23 in V1
+    chip8.executeOpcode(0x8015); // store V0 - V1 in V0
+    expect(chip8.registers.getUint8(0), 0x45 - 0x23);
+    expect(chip8.registers.getUint8(15), 1);
+    chip8.executeOpcode(0x6BCD); // store 0xCD in V11
+    chip8.executeOpcode(0x6CDE); // store 0xDE in V12
+    chip8.executeOpcode(0x8BC5); // store V11 - V12 in V11
+    expect(chip8.registers.getUint8(11), (0xCD - 0xDE) & 0x00FF);
+    expect(chip8.registers.getUint8(15), 0);
   });
 }

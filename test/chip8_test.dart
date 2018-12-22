@@ -24,6 +24,6 @@ void main() {
   });
   test('Chip8 has a keypad with 16 keys', () {
     final chip8 = Chip8();
-    expect(chip8.keypad.lengthInBytes, 16);
+    expect(chip8.keypad.length, 16);
   });
 }

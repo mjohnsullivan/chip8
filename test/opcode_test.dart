@@ -197,4 +197,25 @@ void main() {
     chip8.executeOpcode(0xC845); // put random number in V8
     // No way to test random number, so testing to see if it crashes
   });
+  test('EX9E skips next instruction if the key stored in VX is pressed', () {
+    final chip8 = Chip8();
+    final pc = chip8.programCounter;
+    chip8.executeOpcode(0x6D05); // store 0x05 in VD
+    chip8.executeOpcode(0xED9E); // key 5 not pressed, nothing happens
+    expect(chip8.programCounter, pc);
+    chip8.pressKey(5);
+    chip8.executeOpcode(0xED9E); // key 5 pressed, pc increments
+    expect(chip8.programCounter, pc + 2);
+  });
+  test('EXA1 skips the next instruction if the key stored in VX isnt pressed',
+      () {
+    final chip8 = Chip8();
+    final pc = chip8.programCounter;
+    chip8.executeOpcode(0x6D0B); // store 0x0B in VD
+    chip8.executeOpcode(0xEDA1); // key 11 not pressed, pc increments
+    expect(chip8.programCounter, pc + 2);
+    chip8.pressKey(11);
+    chip8.executeOpcode(0xEDA1); // key 11 pressed, nothing happens
+    expect(chip8.programCounter, pc + 2);
+  });
 }

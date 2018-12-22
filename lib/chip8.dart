@@ -22,7 +22,8 @@ class Chip8 {
   final ramStart = 0x200;
 
   // Display is 64x32 of binary pixels
-  final display = List.unmodifiable(List.generate(64 * 32, (_) => false));
+  final display =
+      List.from(List.generate(64 * 32, (_) => false), growable: false);
 
   // Delay timer
   int delayTimer;
@@ -37,7 +38,7 @@ class Chip8 {
   int stackPointer;
 
   // Keypad
-  ByteData keypad = ByteData.view(Uint8List(16).buffer);
+  final keypad = List.from(List.generate(16, (_) => false), growable: false);
 
   /// Sets a register value, registers numbering from 0..15
   void setRegister(int register, int value) =>
@@ -45,6 +46,15 @@ class Chip8 {
 
   /// Gets the value from a register, registers numbering 0..15
   int getRegister(int register) => registers.getUint8(register);
+
+  /// Presses a key
+  void pressKey(int key) => keypad[key] = true;
+
+  /// Releases a key
+  void releaseKey(int key) => keypad[key] = false;
+
+  /// Checks to see if a key is pressed
+  bool isKeyPressed(int key) => keypad[key];
 
   /// Execute a single CPU cycle
   void step() {
@@ -143,6 +153,26 @@ class Chip8 {
       final randomValue = randomInt(0xFF);
       setRegister(vx, value & randomValue);
       return;
+    }
+    if (opPrefix == 0xE) {
+      switch (leastSignificantByte(opcode)) {
+        case 0x9e:
+          // EX9E - skips the next instruction if the key stored in VX is pressed
+          final vx = secondSignificantNibble(opcode);
+          final xValue = getRegister(vx);
+          if (isKeyPressed(xValue)) {
+            programCounter += 2;
+          }
+          return;
+        case 0xA1:
+          // EXA1 - skips the next instruction if the key stored in VX isn't pressed
+          final vx = secondSignificantNibble(opcode);
+          final xValue = getRegister(vx);
+          if (!isKeyPressed(xValue)) {
+            programCounter += 2;
+          }
+          return;
+      }
     }
   }
 

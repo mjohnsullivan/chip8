@@ -198,6 +198,12 @@ class Chip8 {
           final xValue = getRegister(vx);
           soundTimer = xValue;
           return;
+        case 0x1E:
+          // FX1E - adds VX to I
+          final vx = secondSignificantNibble(opcode);
+          final xValue = getRegister(vx);
+          indexRegister = (indexRegister + xValue) & 0xFFF;
+          return;
       }
     }
   }

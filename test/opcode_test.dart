@@ -236,4 +236,11 @@ void main() {
     chip8.executeOpcode(0xFB18); // store V3 in timer
     expect(chip8.soundTimer, 3);
   });
+  test('FX1E - adds VX to I', () {
+    final chip8 = Chip8();
+    chip8.indexRegister = 0x42; // set I to 0x42
+    chip8.executeOpcode(0x6623); // set V6 to 0x23
+    chip8.executeOpcode(0xF61E); // add V6 to I
+    expect(chip8.indexRegister, 0x42 + 0x23);
+  });
 }

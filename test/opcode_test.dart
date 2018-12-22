@@ -18,7 +18,15 @@ void main() {
     chip8.executeOpcode(0x3457); // compares V4 to 0x56
     expect(chip8.programCounter, pc + 2); // pc should not increment further
   });
-
+  test('4XNN skips the next instruction if VX does not equal NN', () {
+    final chip8 = Chip8();
+    final pc = chip8.programCounter;
+    chip8.executeOpcode(0x6456); // puts 0x56 in V4
+    chip8.executeOpcode(0x4456); // compares V4 to 0x56
+    expect(chip8.programCounter, pc); // pc should not increment
+    chip8.executeOpcode(0x4457); // compares V4 to 0x56
+    expect(chip8.programCounter, pc + 2); // pc should increment
+  });
   test('6XNN places NN in register VX', () {
     final chip8 = Chip8();
     chip8.executeOpcode(0x6023);

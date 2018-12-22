@@ -71,8 +71,18 @@ class Chip8 {
       if (xValue == value) {
         programCounter += 2;
       }
+      return;
     }
-
+    if (opPrefix == 4) {
+      // 4XNN - skips the next instruction if VX doesn't equal NN
+      final vx = secondSignificantNibble(opcode);
+      final xValue = getRegister(vx);
+      final value = leastSignificantByte(opcode);
+      if (xValue != value) {
+        programCounter += 2;
+      }
+      return;
+    }
     if (opPrefix == 6) {
       // 6XNN - sets VX to NN
       final registerNr = secondSignificantNibble(opcode);

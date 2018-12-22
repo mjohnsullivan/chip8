@@ -313,8 +313,12 @@ class Chip8 {
           // Take the decimal representation of VX,
           // place the hundreds digit in memory at location in I,
           // the tens digit at location I+1, and the ones digit at location I+2
-          // TODO: implement
-          throw Exception();
+          final vx = secondSignificantNibble(opcode);
+          final value = getRegister(vx);
+          memory.setUint8(indexRegister, (value ~/ 100) % 10);
+          memory.setUint8(indexRegister + 1, (value ~/ 10) % 10);
+          memory.setUint8(indexRegister + 2, value % 10);
+          return;
         case 0x55:
           // FX55 - stores V0 to VX (including VX) in memory starting at address I.
           // The offset from I is increased by 1 for each value written,

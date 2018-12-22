@@ -323,6 +323,15 @@ void main() {
     chip8.executeOpcode(0xF029);
     expect(chip8.indexRegister, 0x4B);
   });
+  test('FX33 stores digits of VX in I, I+1, and I+2', () {
+    final chip8 = Chip8();
+    chip8.indexRegister = 0x400;
+    chip8.registers.setUint8(0, 254); // set V0 to 456 (decimal)
+    chip8.executeOpcode(0xF033);
+    expect(chip8.memory.getUint8(chip8.indexRegister), 2);
+    expect(chip8.memory.getUint8(chip8.indexRegister + 1), 5);
+    expect(chip8.memory.getUint8(chip8.indexRegister + 2), 4);
+  });
   test('FX55 stores V0 to VX inclusive in memory starting at address I', () {
     final chip8 = Chip8();
     chip8.indexRegister = 0x200; // set I to 0x42

@@ -1,8 +1,5 @@
 import 'dart:typed_data';
-
-main() {
-  print('Hello World');
-}
+import 'package:chip8/bytes.dart';
 
 class Chip8 {
   // 35 opcodes - each 2 bytes in length
@@ -42,22 +39,38 @@ class Chip8 {
   ByteData keypad = ByteData.view(Uint8List(16).buffer);
 
   /// Sets a register value, registers numbering from 0..15
-  void setRegister(int register, int value) {
-    registers.setUint8(register, value);
-  }
+  void setRegister(int register, int value) =>
+      registers.setUint8(register, value);
 
   /// Gets the value from a register, registers numbering 0..15
   int getRegister(int register) => registers.getUint8(register);
 
+  /// Execute a single CPU cycle
+  void step() {
+    // Read the opcode
+    final opcode = 0x00FF; // Dummy opcode
+    // Advance the program counter
+    programCounter = programCounter + 2;
+    // Execute the opcode
+    executeOpcode(opcode);
+  }
+
   /// Executes an opcode
   void executeOpcode(int opcode) {
-    if (mostSignificantNibble(opcode) == 6) {
-      // 6XNN - Sets VX to NN
+    final opPrefix = mostSignificantNibble(opcode);
+    if (opPrefix == 1) {
+      // 1NNN - jumps to address NNN
+      programCounter = lestSignificantTribble(opcode);
+      return;
+    }
+
+    if (opPrefix == 6) {
+      // 6XNN - sets VX to NN
       final registerNr = secondSignificantNibble(opcode);
       setRegister(registerNr, leastSignificantByte(opcode));
       return;
     }
-    if (mostSignificantNibble(opcode) == 7) {
+    if (opPrefix == 7) {
       // 7XNN - Adds NN to VX (Carry flag is not changed)
       final registerNr = secondSignificantNibble(opcode);
       final value = leastSignificantByte(opcode);
@@ -65,106 +78,53 @@ class Chip8 {
       setRegister(registerNr, value + registerValue);
       return;
     }
-    if (mostSignificantNibble(opcode) == 8) {
-      final op = leastSignificantNibble(opcode);
-      switch (op) {
-        case 0: // 8XY0 - Sets VX to the value of VY
-          final xRegisterNr = secondSignificantNibble(opcode);
-          final yRegisterNr = thirdSignificantNibble(opcode);
-          setRegister(xRegisterNr, getRegister(yRegisterNr));
-          return;
-        case 1: // 8XY1 - Sets VX to VX or VY (Bitwise OR operation)
-          final xRegisterNr = secondSignificantNibble(opcode);
-          final yRegisterNr = thirdSignificantNibble(opcode);
-          final xValue = getRegister(xRegisterNr);
-          final yValue = getRegister(yRegisterNr);
-          setRegister(xRegisterNr, xValue | yValue);
-          return;
-        case 2: // 8XY2 - Sets VX to VX and VY (Bitwise AND operation)
-          final xRegisterNr = secondSignificantNibble(opcode);
-          final yRegisterNr = thirdSignificantNibble(opcode);
-          final xValue = getRegister(xRegisterNr);
-          final yValue = getRegister(yRegisterNr);
-          setRegister(xRegisterNr, xValue & yValue);
-          return;
-        case 3: // 8XY3 - Sets VX to VX xor VY (Bitwise XOR operation)
-          final xRegisterNr = secondSignificantNibble(opcode);
-          final yRegisterNr = thirdSignificantNibble(opcode);
-          final xValue = getRegister(xRegisterNr);
-          final yValue = getRegister(yRegisterNr);
-          setRegister(xRegisterNr, xValue ^ yValue);
-          return;
-        case 4: // 8XY4 - Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't
-          final xRegisterNr = secondSignificantNibble(opcode);
-          final yRegisterNr = thirdSignificantNibble(opcode);
-          final xValue = getRegister(xRegisterNr);
-          final yValue = getRegister(yRegisterNr);
-          final addedValue = xValue + yValue;
-          setRegister(xRegisterNr, addedValue);
-          setRegister(0xF, addedValue > 0xFF ? 1 : 0);
-          return;
-        case 5: // 8XY5 - VY is subtracted from VX, VF is set to 0 when there's a borrow, and 1 when there isn't
-          final xRegisterNr = secondSignificantNibble(opcode);
-          final yRegisterNr = thirdSignificantNibble(opcode);
-          final xValue = getRegister(xRegisterNr);
-          final yValue = getRegister(yRegisterNr);
-          final subtractedValue = xValue - yValue;
-          setRegister(xRegisterNr, subtractedValue);
-          setRegister(0xF, subtractedValue >= 0 ? 1 : 0);
-          return;
-        case 6: // 8XY6 - stores the least significant bit of VX in VF and then shifts VX to the right by 1
-          final vx = secondSignificantNibble(opcode);
-          final xValue = getRegister(vx);
-          setRegister(0xF, xValue & 0x1);
-          setRegister(vx, xValue >> 1);
-          return;
-        case 7: // 8XY7 - sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't
-          final xRegisterNr = secondSignificantNibble(opcode);
-          final yRegisterNr = thirdSignificantNibble(opcode);
-          final xValue = getRegister(xRegisterNr);
-          final yValue = getRegister(yRegisterNr);
-          final subtractedValue = yValue - xValue;
-          setRegister(xRegisterNr, subtractedValue);
-          setRegister(0xF, subtractedValue >= 0 ? 1 : 0);
-          return;
-        case 0xE: // 8XYE - stores the most significant bit of VX in VF and then shifts VX to the left by 1
-          final vx = secondSignificantNibble(opcode);
-          final xValue = getRegister(vx);
-          setRegister(0xF, xValue >> 7);
-          setRegister(vx, xValue << 1);
-          return;
-      }
+    if (opPrefix == 8) {
+      executeOpcode8(opcode);
     }
   }
-}
 
-/// Returns the value of the most significant nibble from a word
-int mostSignificantNibble(final int word) {
-  final clearedWord = word & 0xF000;
-  final shiftedWord = clearedWord >> 12;
-  return shiftedWord;
-}
-
-/// Returns the value of the 2nd most significant nibble from a word
-int secondSignificantNibble(final int word) {
-  final clearedWord = word & 0x0F00;
-  final shiftedWord = clearedWord >> 8;
-  return shiftedWord;
-}
-
-/// Returns the value of the 3nd most significant nibble from a word
-int thirdSignificantNibble(final int word) {
-  final clearedWord = word & 0x00F0;
-  final shiftedWord = clearedWord >> 4;
-  return shiftedWord;
-}
-
-/// Returns the value of the least significant byte from a word
-int leastSignificantByte(final int word) {
-  return word & 0x00FF;
-}
-
-/// Returns the value of the least significant nibble from a word
-int leastSignificantNibble(final int word) {
-  return word & 0x000F;
+  void executeOpcode8(int opcode) {
+    final op = leastSignificantNibble(opcode);
+    final vx = secondSignificantNibble(opcode);
+    final vy = thirdSignificantNibble(opcode);
+    final xValue = getRegister(vx);
+    final yValue = getRegister(vy);
+    switch (op) {
+      case 0: // 8XY0 - Sets VX to the value of VY
+        setRegister(vx, getRegister(vy));
+        return;
+      case 1: // 8XY1 - Sets VX to VX or VY (Bitwise OR operation)
+        setRegister(vx, xValue | yValue);
+        return;
+      case 2: // 8XY2 - Sets VX to VX and VY (Bitwise AND operation)
+        setRegister(vx, xValue & yValue);
+        return;
+      case 3: // 8XY3 - Sets VX to VX xor VY (Bitwise XOR operation)
+        setRegister(vx, xValue ^ yValue);
+        return;
+      case 4: // 8XY4 - Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't
+        final addedValue = xValue + yValue;
+        setRegister(vx, addedValue);
+        setRegister(0xF, addedValue > 0xFF ? 1 : 0);
+        return;
+      case 5: // 8XY5 - VY is subtracted from VX, VF is set to 0 when there's a borrow, and 1 when there isn't
+        final subtractedValue = xValue - yValue;
+        setRegister(vx, subtractedValue);
+        setRegister(0xF, subtractedValue >= 0 ? 1 : 0);
+        return;
+      case 6: // 8XY6 - stores the least significant bit of VX in VF and then shifts VX to the right by 1
+        setRegister(0xF, xValue & 0x1);
+        setRegister(vx, xValue >> 1);
+        return;
+      case 7: // 8XY7 - sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't
+        final subtractedValue = yValue - xValue;
+        setRegister(vx, subtractedValue);
+        setRegister(0xF, subtractedValue >= 0 ? 1 : 0);
+        return;
+      case 0xE: // 8XYE - stores the most significant bit of VX in VF and then shifts VX to the left by 1
+        setRegister(0xF, xValue >> 7);
+        setRegister(vx, xValue << 1);
+        return;
+    }
+  }
 }

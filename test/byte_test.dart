@@ -1,5 +1,5 @@
 import "package:test/test.dart";
-import '../lib/chip8.dart';
+import 'package:chip8/bytes.dart';
 
 void main() {
   test('mostSignificantNibble returns the most significant nibble from a word',

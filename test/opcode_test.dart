@@ -2,6 +2,13 @@ import "package:test/test.dart";
 import '../lib/chip8.dart';
 
 void main() {
+  test('1NNN jumps to address NNN', () {
+    final chip8 = Chip8();
+    chip8.executeOpcode(0x1234);
+    expect(chip8.programCounter, 0x234);
+    chip8.executeOpcode(0x1CDE);
+    expect(chip8.programCounter, 0xCDE);
+  });
   test('6XNN places NN in register VX', () {
     final chip8 = Chip8();
     chip8.executeOpcode(0x6023);

@@ -233,8 +233,14 @@ class Chip8 {
         case 0x56:
           // FX56 - fills V0 to VX (including VX) with values from memory starting at
           // address I. The offset from I is increased by 1 for each value written,
-          // but I itself is left unmodifie
-          throw Exception();
+          // but I itself is left unmodified
+          final vx = secondSignificantNibble(opcode);
+          var memoryPointer = indexRegister;
+          for (var vi = 0; vi <= vx; vi++) {
+            final value = memory.getUint8(memoryPointer++);
+            setRegister(vi, value);
+          }
+          return;
       }
     }
   }

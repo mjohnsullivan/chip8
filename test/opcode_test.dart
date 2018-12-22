@@ -249,7 +249,8 @@ void main() {
     chip8.executeOpcode(0x6001); // set V0 to 0x01
     chip8.executeOpcode(0x6102); // set V1 to 0x02
     chip8.executeOpcode(0x6203); // set V2 to 0x03
-    chip8.executeOpcode(0x6310); // set V2 to 0x10
+    chip8.executeOpcode(0x6310); // set V3 to 0x10
+    chip8.executeOpcode(0x64FF); // set V3 to 0xFF
     chip8.executeOpcode(0xF455); // move V0 - V4 to memory
     expect(chip8.indexRegister, 0x42); // I does not change
     expect(chip8.memory.getUint8(0x41), 0);
@@ -257,6 +258,24 @@ void main() {
     expect(chip8.memory.getUint8(0x43), 2);
     expect(chip8.memory.getUint8(0x44), 3);
     expect(chip8.memory.getUint8(0x45), 16);
-    expect(chip8.memory.getUint8(0x46), 0);
+    expect(chip8.memory.getUint8(0x46), 255);
+    expect(chip8.memory.getUint8(0x47), 0);
+  });
+  test('FX56 - fills V0 to VX inclusive with memory values starting at I', () {
+    final chip8 = Chip8();
+    chip8.indexRegister = 0x42; // set I to 0x42
+    chip8.memory.setUint8(0x42, 0x01);
+    chip8.memory.setUint8(0x43, 0x02);
+    chip8.memory.setUint8(0x44, 0x03);
+    chip8.memory.setUint8(0x45, 0x10);
+    chip8.memory.setUint8(0x46, 0xFF);
+    chip8.executeOpcode(0xF456); // move memory to V0 - V4
+    expect(chip8.indexRegister, 0x42); // I does not change
+    expect(chip8.registers.getUint8(0), 1);
+    expect(chip8.registers.getUint8(1), 2);
+    expect(chip8.registers.getUint8(2), 3);
+    expect(chip8.registers.getUint8(3), 16);
+    expect(chip8.registers.getUint8(4), 255);
+    expect(chip8.registers.getUint8(5), 0);
   });
 }

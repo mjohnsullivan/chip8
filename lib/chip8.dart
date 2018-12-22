@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:chip8/bytes.dart';
+import 'package:chip8/utils.dart';
 
 class Chip8 {
   // 35 opcodes - each 2 bytes in length
@@ -132,6 +133,15 @@ class Chip8 {
       // BNNN - jumps to the address NNN plus V0
       programCounter =
           (leastSignificantTribble(opcode) + getRegister(0)) & 0xFFF;
+      return;
+    }
+    if (opPrefix == 0xC) {
+      // CXNN - sets VX to the result of a bitwise and operation on a random number
+      // (Typically: 0 to 255) and NN
+      final vx = secondSignificantNibble(opcode);
+      final value = leastSignificantByte(opcode);
+      final randomValue = randomInt(0xFF);
+      setRegister(vx, value & randomValue);
       return;
     }
   }

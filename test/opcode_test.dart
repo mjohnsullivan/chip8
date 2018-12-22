@@ -192,4 +192,9 @@ void main() {
     chip8.executeOpcode(0xB234); // jump to V0 + 0x234
     expect(chip8.programCounter, (0x45 + 0x234) & 0xFFF);
   });
+  test('CXNN jumps to the address NNN plus V0', () {
+    final chip8 = Chip8();
+    chip8.executeOpcode(0xC845); // put random number in V8
+    // No way to test random number, so testing to see if it crashes
+  });
 }

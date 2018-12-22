@@ -12,7 +12,7 @@ class Chip8 {
   int indexRegister;
 
   // Program register, 12 bits in size
-  int programCounter;
+  int programCounter = 0;
 
   // Memory, 4096 bytes in size
   ByteData memory = ByteData.view(Uint8List(4096).buffer);
@@ -50,7 +50,7 @@ class Chip8 {
     // Read the opcode
     final opcode = 0x00FF; // Dummy opcode
     // Advance the program counter
-    programCounter = programCounter + 2;
+    programCounter += 2;
     // Execute the opcode
     executeOpcode(opcode);
   }
@@ -62,6 +62,15 @@ class Chip8 {
       // 1NNN - jumps to address NNN
       programCounter = lestSignificantTribble(opcode);
       return;
+    }
+    if (opPrefix == 3) {
+      // 3XNN - skips the next instruction if VX equals NN
+      final vx = secondSignificantNibble(opcode);
+      final xValue = getRegister(vx);
+      final value = leastSignificantByte(opcode);
+      if (xValue == value) {
+        programCounter += 2;
+      }
     }
 
     if (opPrefix == 6) {

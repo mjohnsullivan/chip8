@@ -128,6 +128,12 @@ class Chip8 {
       indexRegister = leastSignificantTribble(opcode);
       return;
     }
+    if (opPrefix == 0xB) {
+      // BNNN - jumps to the address NNN plus V0
+      programCounter =
+          (leastSignificantTribble(opcode) + getRegister(0)) & 0xFFF;
+      return;
+    }
   }
 
   void executeOpcode8(int opcode) {

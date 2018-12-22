@@ -186,4 +186,10 @@ void main() {
     chip8.executeOpcode(0xACDE);
     expect(chip8.indexRegister, 0xCDE);
   });
+  test('BNNN jumps to the address NNN plus V0', () {
+    final chip8 = Chip8();
+    chip8.executeOpcode(0x6045); // put 0x45 in V0
+    chip8.executeOpcode(0xB234); // jump to V0 + 0x234
+    expect(chip8.programCounter, (0x45 + 0x234) & 0xFFF);
+  });
 }

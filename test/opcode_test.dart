@@ -9,6 +9,18 @@ void main() {
       throwsA(const TypeMatcher<Exception>()),
     );
   });
+  test('00E0 clears the screen', () {
+    final chip8 = Chip8();
+    // set all pixels to on
+    chip8.display.setAll(0, List.generate(64 * 32, (_) => true));
+    for (int i = 0; i < 64 * 32; i++) {
+      expect(chip8.display[i], true);
+    }
+    chip8.executeOpcode(0x00E0); // clear the screen
+    for (int i = 0; i < 64 * 32; i++) {
+      expect(chip8.display[i], false);
+    }
+  });
   test('1NNN jumps to address NNN', () {
     final chip8 = Chip8();
     chip8.executeOpcode(0x1234);

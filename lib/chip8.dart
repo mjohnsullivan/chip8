@@ -60,7 +60,7 @@ class Chip8 {
     final opPrefix = mostSignificantNibble(opcode);
     if (opPrefix == 1) {
       // 1NNN - jumps to address NNN
-      programCounter = lestSignificantTribble(opcode);
+      programCounter = leastSignificantTribble(opcode);
       return;
     }
     if (opPrefix == 3) {
@@ -121,6 +121,11 @@ class Chip8 {
       if (xValue != yValue) {
         programCounter += 2;
       }
+      return;
+    }
+    if (opPrefix == 0xA) {
+      // ANNN - sets I to the address NNN
+      indexRegister = leastSignificantTribble(opcode);
       return;
     }
   }

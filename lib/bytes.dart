@@ -30,6 +30,6 @@ int leastSignificantNibble(final int word) {
 }
 
 /// Returns the value of the least significant tribble (12 bits) from a word
-int lestSignificantTribble(final int word) {
+int leastSignificantTribble(final int word) {
   return word & 0x0FFF;
 }

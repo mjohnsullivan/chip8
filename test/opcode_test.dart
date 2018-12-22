@@ -116,7 +116,7 @@ void main() {
     expect(chip8.registers.getUint8(11), (0xCD + 0xDE) & 0x00FF);
     expect(chip8.registers.getUint8(15), 0x01);
   });
-  test('8XY5 - VY subtracted from VX, VF is set to 0 when borrow, 1 otherwise',
+  test('8XY5 VY subtracted from VX, VF is set to 0 when borrow, 1 otherwise',
       () {
     final chip8 = Chip8();
     chip8.executeOpcode(0x6045); // store 0x45 in V0
@@ -130,7 +130,7 @@ void main() {
     expect(chip8.registers.getUint8(11), (0xCD - 0xDE) & 0x00FF);
     expect(chip8.registers.getUint8(15), 0);
   });
-  test('8XY6 - stores the VX least significant bit in VF, shifts VX right by 1',
+  test('8XY6 stores the VX least significant bit in VF, shifts VX right by 1',
       () {
     final chip8 = Chip8();
     chip8.executeOpcode(0x6045); // store 0x45 in V0
@@ -142,7 +142,7 @@ void main() {
     expect(chip8.registers.getUint8(11), 0xCE >> 1);
     expect(chip8.registers.getUint8(15), 0);
   });
-  test('8XY7 - VX subtracted from VY, VF is set to 0 when borrow, 1 otherwise',
+  test('8XY7 VX subtracted from VY, VF is set to 0 when borrow, 1 otherwise',
       () {
     final chip8 = Chip8();
     chip8.executeOpcode(0x6045); // store 0x45 in V0
@@ -156,7 +156,7 @@ void main() {
     expect(chip8.registers.getUint8(11), 0xDE - 0xCD);
     expect(chip8.registers.getUint8(15), 1);
   });
-  test('8XYE - stores the VX most significant bit in VF, shifts VX left by 1',
+  test('8XYE stores the VX most significant bit in VF, shifts VX left by 1',
       () {
     final chip8 = Chip8();
     chip8.executeOpcode(0x6045); // store 0x45 in V0
@@ -178,5 +178,12 @@ void main() {
     chip8.executeOpcode(0x6557); // puts 0x57 in V5
     chip8.executeOpcode(0x9450); // compares V4 to V5
     expect(chip8.programCounter, pc + 2); // pc should increment
+  });
+  test('ANNN sets I to the address NNN', () {
+    final chip8 = Chip8();
+    chip8.executeOpcode(0xA234);
+    expect(chip8.indexRegister, 0x234);
+    chip8.executeOpcode(0xACDE);
+    expect(chip8.indexRegister, 0xCDE);
   });
 }

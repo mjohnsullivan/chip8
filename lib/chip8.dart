@@ -27,6 +27,12 @@ class Chip8 {
   final display =
       List.from(List.generate(64 * 32, (_) => false), growable: false);
 
+  /// Paints a pixel at (x,y)
+  void draw(int x, int y, bool value) {
+    assert(y >= 0 && y < 32 && x >= 0 && x < 64);
+    display[(y * 64) + x] = value;
+  }
+
   // Delay timer
   int delayTimer;
 
@@ -92,8 +98,10 @@ class Chip8 {
     }
     if (opPrefix == 2) {
       // 2NNN - calls subroutine at NNN
-      // TODO: implement
-      throw Exception();
+      final addr = leastSignificantTribble(opcode);
+      push = programCounter + 2;
+      programCounter = addr;
+      return;
     }
     if (opPrefix == 3) {
       // 3XNN - skips the next instruction if VX equals NN
@@ -173,6 +181,38 @@ class Chip8 {
       final value = leastSignificantByte(opcode);
       final randomValue = randomInt(0xFF);
       setRegister(vx, value & randomValue);
+      return;
+    }
+    if (opPrefix == 0xD) {
+      // DXYN - draws a sprite at coordinate (VX, VY) that has a width of 8 pixels
+      // and a height of N pixels. Each row of 8 pixels is read as bit-coded starting
+      // from memory location I; I value doesn’t change after the execution of this
+      // instruction. As described above, VF is set to 1 if any screen pixels are
+      // flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t
+      // happen
+      // TODO: WiP
+      final vx = secondSignificantNibble(opcode);
+      final vy = thirdSignificantNibble(opcode);
+      final spriteHeight = leastSignificantNibble(opcode);
+      final xCoord = getRegister(vx);
+      final yCoord = getRegister(vy);
+      var memoryPointer = indexRegister;
+
+      // Iterate through each row
+      // e.g. to draw a row, i.e. single byte of pixels
+      // draw(xCoord, yCoord, (spriteByte >> 7 & 0x01) == 0x01);
+      // draw(xCoord + 1, yCoord, (spriteByte >> 6 & 0x01) == 0x01);
+      // draw(xCoord + 7, yCoord, (spriteByte >> 0 & 0x01) == 0x01);
+      for (int row = 0; row < spriteHeight; row++) {
+        final spriteByte = memory.getUint8(memoryPointer++);
+        for (int bit = 7; bit >= 0; bit--) {
+          draw(
+            xCoord + (7 - bit),
+            yCoord + row,
+            (spriteByte >> bit & 0x01) == 0x01,
+          );
+        }
+      }
       return;
     }
     if (opPrefix == 0xE) {

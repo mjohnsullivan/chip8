@@ -36,6 +36,13 @@ void main() {
     chip8.executeOpcode(0x1CDE);
     expect(chip8.programCounter, 0xCDE);
   });
+  test('2NNN calls subroutine at NNN', () {
+    final chip8 = Chip8();
+    chip8.programCounter = 0x135;
+    chip8.executeOpcode(0x2579);
+    expect(chip8.programCounter, 0x579);
+    expect(chip8.pop, 0x137);
+  });
   test('3XNN skips the next instruction if VX equals NN', () {
     final chip8 = Chip8();
     final pc = chip8.programCounter;
@@ -223,6 +230,26 @@ void main() {
     final chip8 = Chip8();
     chip8.executeOpcode(0xC845); // put random number in V8
     // No way to test random number, so testing to see if it crashes
+  });
+  test('DXYN draws a sprite to the display', () {
+    final chip8 = Chip8();
+    chip8.memory.setUint8(0x123, 0xFF); // first sprite row
+    chip8.memory.setUint8(0x124, 0x10); // second sprite row
+    chip8.indexRegister = 0x123;
+    chip8.registers.setUint8(3, 0); // VX - x coordinate
+    chip8.memory.setUint8(4, 0); // VY - y coordinate
+    chip8.executeOpcode(0xD342);
+    for (int i = 0; i < 8; i++) {
+      // Test the first byte of the sprite
+      expect(chip8.display[0], true);
+    }
+    for (int i = 64; i < 71; i++) {
+      if (i == 67) {
+        expect(chip8.display[i], true);
+        continue;
+      }
+      expect(chip8.display[i], false);
+    }
   });
   test('EX9E skips next instruction if the key stored in VX is pressed', () {
     final chip8 = Chip8();

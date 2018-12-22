@@ -30,4 +30,22 @@ void main() {
     final chip8 = Chip8();
     expect(chip8.keypad.length, 16);
   });
+  test('Chip8 draws pixels to the display', () {
+    final chip8 = Chip8();
+    expect(chip8.display[0], false);
+    chip8.draw(0, 0, true);
+    expect(chip8.display[0], true);
+    chip8.draw(0, 0, false);
+    expect(chip8.display[0], false);
+    chip8.draw(0, 1, true);
+    expect(chip8.display[64], true);
+    chip8.draw(10, 10, true);
+    expect(chip8.display[650], true);
+    chip8.draw(63, 31, true);
+    expect(chip8.display[2047], true);
+    expect(() => chip8.draw(64, 0, true),
+        throwsA(const TypeMatcher<AssertionError>()));
+    expect(() => chip8.draw(0, 32, true),
+        throwsA(const TypeMatcher<AssertionError>()));
+  });
 }

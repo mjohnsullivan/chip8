@@ -218,4 +218,22 @@ void main() {
     chip8.executeOpcode(0xEDA1); // key 11 pressed, nothing happens
     expect(chip8.programCounter, pc + 2);
   });
+  test('FX07 - sets VX to the value of the delay timer', () {
+    final chip8 = Chip8();
+    chip8.delayTimer = 45;
+    chip8.executeOpcode(0xF907); // store timer in V9
+    expect(chip8.registers.getUint8(9), chip8.delayTimer);
+  });
+  test('FX15 - sets the delay timer to VX', () {
+    final chip8 = Chip8();
+    chip8.executeOpcode(0x6312); // set V3 to 0x12
+    chip8.executeOpcode(0xF315); // store V3 in timer
+    expect(chip8.delayTimer, 0x12);
+  });
+  test('FX18 - sets the sound timer to VX', () {
+    final chip8 = Chip8();
+    chip8.executeOpcode(0x6B03); // set VB to 0x03
+    chip8.executeOpcode(0xFB18); // store V3 in timer
+    expect(chip8.soundTimer, 3);
+  });
 }

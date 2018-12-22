@@ -174,6 +174,32 @@ class Chip8 {
           return;
       }
     }
+    if (opPrefix == 0xF) {
+      switch (leastSignificantByte(opcode)) {
+        case 0x07:
+          // FX07 - sets VX to the value of the delay timer
+          final vx = secondSignificantNibble(opcode);
+          setRegister(vx, delayTimer);
+          return;
+        case 0x0A:
+          // A key press is awaited, and then stored in VX
+          // Blocking Operation - all instruction halted until next key event
+          // TODO: implement
+          throw Exception();
+        case 0x15:
+          // FX15 - sets the delay timer to VX
+          final vx = secondSignificantNibble(opcode);
+          final xValue = getRegister(vx);
+          delayTimer = xValue;
+          return;
+        case 0x18:
+          // FX18 - sets the sound timer to VX
+          final vx = secondSignificantNibble(opcode);
+          final xValue = getRegister(vx);
+          soundTimer = xValue;
+          return;
+      }
+    }
   }
 
   void executeOpcode8(int opcode) {

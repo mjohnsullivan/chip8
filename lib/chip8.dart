@@ -83,6 +83,17 @@ class Chip8 {
       }
       return;
     }
+    if (opPrefix == 5) {
+      // 5XY0 - skips the next instruction if VX equals VY
+      final vx = secondSignificantNibble(opcode);
+      final xValue = getRegister(vx);
+      final vy = thirdSignificantNibble(opcode);
+      final yValue = getRegister(vy);
+      if (xValue == yValue) {
+        programCounter += 2;
+      }
+      return;
+    }
     if (opPrefix == 6) {
       // 6XNN - sets VX to NN
       final registerNr = secondSignificantNibble(opcode);

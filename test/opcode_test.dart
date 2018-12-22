@@ -21,6 +21,14 @@ void main() {
       expect(chip8.display[i], false);
     }
   });
+  test('00EE returns from a subroutine', () {
+    final chip8 = Chip8();
+    chip8.push = 0x456;
+    chip8.executeOpcode(0x00EE);
+    expect(chip8.programCounter, 0x456);
+    expect(() => chip8.executeOpcode(0x00EE),
+        throwsA(const TypeMatcher<RangeError>()));
+  });
   test('1NNN jumps to address NNN', () {
     final chip8 = Chip8();
     chip8.executeOpcode(0x1234);

@@ -78,8 +78,8 @@ class Chip8 {
           return;
         case 0x0EE:
           // 00EE - returns from a subroutine
-          // TODO: implement
-          throw Exception();
+          programCounter = pop;
+          return;
         default:
           // 0NNN - calls RCA 1802 program at address NNN. Not necessary for most ROMs
           throw Exception();

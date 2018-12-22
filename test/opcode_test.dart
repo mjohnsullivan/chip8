@@ -311,23 +311,34 @@ void main() {
     chip8.executeOpcode(0xF61E); // add V6 to I
     expect(chip8.indexRegister, 0x42 + 0x23);
   });
+  test('FX29 sets I to the location of the sprite for the char in VX', () {
+    final chip8 = Chip8();
+    chip8.executeOpcode(0x6000); // set V0 to char '0'
+    chip8.executeOpcode(0xF029);
+    expect(chip8.indexRegister, 0);
+    chip8.executeOpcode(0x6001); // set V0 to char '1'
+    chip8.executeOpcode(0xF029);
+    expect(chip8.indexRegister, 5);
+    chip8.executeOpcode(0x600F); // set V0 to char 'F'
+    chip8.executeOpcode(0xF029);
+    expect(chip8.indexRegister, 0x4B);
+  });
   test('FX55 stores V0 to VX inclusive in memory starting at address I', () {
     final chip8 = Chip8();
-    chip8.indexRegister = 0x42; // set I to 0x42
+    chip8.indexRegister = 0x200; // set I to 0x42
     chip8.executeOpcode(0x6001); // set V0 to 0x01
     chip8.executeOpcode(0x6102); // set V1 to 0x02
     chip8.executeOpcode(0x6203); // set V2 to 0x03
     chip8.executeOpcode(0x6310); // set V3 to 0x10
     chip8.executeOpcode(0x64FF); // set V3 to 0xFF
     chip8.executeOpcode(0xF455); // move V0 - V4 to memory
-    expect(chip8.indexRegister, 0x42); // I does not change
-    expect(chip8.memory.getUint8(0x41), 0);
-    expect(chip8.memory.getUint8(0x42), 1);
-    expect(chip8.memory.getUint8(0x43), 2);
-    expect(chip8.memory.getUint8(0x44), 3);
-    expect(chip8.memory.getUint8(0x45), 16);
-    expect(chip8.memory.getUint8(0x46), 255);
-    expect(chip8.memory.getUint8(0x47), 0);
+    expect(chip8.indexRegister, 0x200); // I does not change
+    expect(chip8.memory.getUint8(0x200), 1);
+    expect(chip8.memory.getUint8(0x201), 2);
+    expect(chip8.memory.getUint8(0x202), 3);
+    expect(chip8.memory.getUint8(0x203), 16);
+    expect(chip8.memory.getUint8(0x204), 255);
+    expect(chip8.memory.getUint8(0x205), 0);
   });
   test('FX56 fills V0 to VX inclusive with memory values starting at I', () {
     final chip8 = Chip8();

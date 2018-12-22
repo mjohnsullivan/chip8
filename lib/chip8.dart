@@ -1,8 +1,15 @@
 import 'dart:typed_data';
 import 'package:chip8/bytes.dart';
+import 'package:chip8/font.dart';
 import 'package:chip8/utils.dart';
 
+final fontMemoryBase = 0;
+
 class Chip8 {
+  Chip8() {
+    loadFonts();
+  }
+
   // 35 opcodes - each 2 bytes in length
   final opcodes = ByteData.view(Uint16List(35).buffer);
 
@@ -69,6 +76,19 @@ class Chip8 {
 
   /// Returns the index of the pressed key, or -1 of no keys are pressed
   int pressedKey() => keypad.indexOf(true);
+
+  /// Loads font data into memory
+  void loadFonts() {
+    for (int i = 0; i < fonts.length; i++) {
+      memory.setUint8(fontMemoryBase + i, fonts[i]);
+    }
+  }
+
+  /// Returns the memory location of a sprite for the character
+  int fontLocation(int char) {
+    assert(char >= 0 && char <= 0xF);
+    return fontMemoryBase + (char * 5);
+  }
 
   /// Execute a single CPU cycle
   void step() {
@@ -281,8 +301,10 @@ class Chip8 {
         case 0x29:
           // FX29 - sets I to the location of the sprite for the character in VX
           // Characters 0-F (in hexadecimal) are represented by a 4x5 font
-          // TODO: implement
-          throw Exception();
+          final vx = secondSignificantNibble(opcode);
+          final char = getRegister(vx);
+          indexRegister = fontLocation(char);
+          return;
         case 0x33:
           // FX33 - stores the binary-coded decimal representation of VX,
           // with the most significant of three digits at the address in I,

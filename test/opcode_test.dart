@@ -243,4 +243,20 @@ void main() {
     chip8.executeOpcode(0xF61E); // add V6 to I
     expect(chip8.indexRegister, 0x42 + 0x23);
   });
+  test('FX55 - stores V0 to VX inclusive in memory starting at address I', () {
+    final chip8 = Chip8();
+    chip8.indexRegister = 0x42; // set I to 0x42
+    chip8.executeOpcode(0x6001); // set V0 to 0x01
+    chip8.executeOpcode(0x6102); // set V1 to 0x02
+    chip8.executeOpcode(0x6203); // set V2 to 0x03
+    chip8.executeOpcode(0x6310); // set V2 to 0x10
+    chip8.executeOpcode(0xF455); // move V0 - V4 to memory
+    expect(chip8.indexRegister, 0x42); // I does not change
+    expect(chip8.memory.getUint8(0x41), 0);
+    expect(chip8.memory.getUint8(0x42), 1);
+    expect(chip8.memory.getUint8(0x43), 2);
+    expect(chip8.memory.getUint8(0x44), 3);
+    expect(chip8.memory.getUint8(0x45), 16);
+    expect(chip8.memory.getUint8(0x46), 0);
+  });
 }

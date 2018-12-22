@@ -204,6 +204,37 @@ class Chip8 {
           final xValue = getRegister(vx);
           indexRegister = (indexRegister + xValue) & 0xFFF;
           return;
+        case 0x29:
+          // FX29 - sets I to the location of the sprite for the character in VX
+          // Characters 0-F (in hexadecimal) are represented by a 4x5 font
+          // TODO: implement
+          throw Exception();
+        case 0x33:
+          // FX33 - stores the binary-coded decimal representation of VX,
+          // with the most significant of three digits at the address in I,
+          // the middle digit at I plus 1, and the least significant digit at I plus 2
+
+          // Take the decimal representation of VX,
+          // place the hundreds digit in memory at location in I,
+          // the tens digit at location I+1, and the ones digit at location I+2
+          // TODO: implement
+          throw Exception();
+        case 0x55:
+          // FX55 - stores V0 to VX (including VX) in memory starting at address I.
+          // The offset from I is increased by 1 for each value written,
+          // but I itself is left unmodified
+          final vx = secondSignificantNibble(opcode);
+          var memoryPointer = indexRegister;
+          for (var vi = 0; vi <= vx; vi++) {
+            final value = getRegister(vi);
+            memory.setInt8(memoryPointer++, value);
+          }
+          return;
+        case 0x56:
+          // FX56 - fills V0 to VX (including VX) with values from memory starting at
+          // address I. The offset from I is increased by 1 for each value written,
+          // but I itself is left unmodifie
+          throw Exception();
       }
     }
   }

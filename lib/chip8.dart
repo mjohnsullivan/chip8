@@ -45,7 +45,8 @@ class Chip8 {
   int get pop => _stack.removeLast();
 
   /// Keypad
-  final keypad = List.from(List.generate(16, (_) => false), growable: false);
+  final keypad =
+      List<bool>.from(List.generate(16, (_) => false), growable: false);
 
   /// Sets a register value, registers numbering from 0..15
   void setRegister(int register, int value) =>
@@ -62,6 +63,12 @@ class Chip8 {
 
   /// Checks to see if a key is pressed
   bool isKeyPressed(int key) => keypad[key];
+
+  /// Checks to see if any key is pressed
+  bool isAnyKeyPressed() => keypad.any((key) => true);
+
+  /// Returns the index of the pressed key, or -1 of no keys are pressed
+  int pressedKey() => keypad.indexOf(true);
 
   /// Execute a single CPU cycle
   void step() {
@@ -190,7 +197,6 @@ class Chip8 {
       // instruction. As described above, VF is set to 1 if any screen pixels are
       // flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t
       // happen
-      // TODO: WiP
       final vx = secondSignificantNibble(opcode);
       final vy = thirdSignificantNibble(opcode);
       final spriteHeight = leastSignificantNibble(opcode);
@@ -217,7 +223,7 @@ class Chip8 {
     }
     if (opPrefix == 0xE) {
       switch (leastSignificantByte(opcode)) {
-        case 0x9e:
+        case 0x9E:
           // EX9E - skips the next instruction if the key stored in VX is pressed
           final vx = secondSignificantNibble(opcode);
           final xValue = getRegister(vx);
@@ -243,10 +249,17 @@ class Chip8 {
           setRegister(vx, delayTimer);
           return;
         case 0x0A:
-          // A key press is awaited, and then stored in VX
+          // FX0A - key press is awaited, and then stored in VX
           // Blocking Operation - all instruction halted until next key event
-          // TODO: implement
-          throw Exception();
+          final key = pressedKey();
+          if (key != -1) {
+            final vx = secondSignificantNibble(opcode);
+            setRegister(vx, key);
+          } else {
+            // program should not advance; keep PC on this instruction
+            programCounter -= 2;
+          }
+          return;
         case 0x15:
           // FX15 - sets the delay timer to VX
           final vx = secondSignificantNibble(opcode);

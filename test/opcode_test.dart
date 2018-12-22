@@ -272,32 +272,46 @@ void main() {
     chip8.executeOpcode(0xEDA1); // key 11 pressed, nothing happens
     expect(chip8.programCounter, pc + 2);
   });
-  test('FX07 - sets VX to the value of the delay timer', () {
+  test('FX07 sets VX to the value of the delay timer', () {
     final chip8 = Chip8();
     chip8.delayTimer = 45;
     chip8.executeOpcode(0xF907); // store timer in V9
     expect(chip8.registers.getUint8(9), chip8.delayTimer);
   });
-  test('FX15 - sets the delay timer to VX', () {
+  test('FX0A key press is awaited, and then stored in VX', () {
+    final chip8 = Chip8();
+    // Key is not pressed
+    chip8.programCounter = 0x100;
+    chip8.executeOpcode(0xF00A);
+    expect(chip8.programCounter, 0x0FE);
+    expect(chip8.registers.getUint8(0), 0);
+    // Key is pressed
+    chip8.keypad[10] = true;
+    chip8.programCounter = 0x100;
+    chip8.executeOpcode(0xF00A);
+    expect(chip8.programCounter, 0x100);
+    expect(chip8.registers.getUint8(0), 0xA);
+  });
+  test('FX15 sets the delay timer to VX', () {
     final chip8 = Chip8();
     chip8.executeOpcode(0x6312); // set V3 to 0x12
     chip8.executeOpcode(0xF315); // store V3 in timer
     expect(chip8.delayTimer, 0x12);
   });
-  test('FX18 - sets the sound timer to VX', () {
+  test('FX18 sets the sound timer to VX', () {
     final chip8 = Chip8();
     chip8.executeOpcode(0x6B03); // set VB to 0x03
     chip8.executeOpcode(0xFB18); // store V3 in timer
     expect(chip8.soundTimer, 3);
   });
-  test('FX1E - adds VX to I', () {
+  test('FX1E adds VX to I', () {
     final chip8 = Chip8();
     chip8.indexRegister = 0x42; // set I to 0x42
     chip8.executeOpcode(0x6623); // set V6 to 0x23
     chip8.executeOpcode(0xF61E); // add V6 to I
     expect(chip8.indexRegister, 0x42 + 0x23);
   });
-  test('FX55 - stores V0 to VX inclusive in memory starting at address I', () {
+  test('FX55 stores V0 to VX inclusive in memory starting at address I', () {
     final chip8 = Chip8();
     chip8.indexRegister = 0x42; // set I to 0x42
     chip8.executeOpcode(0x6001); // set V0 to 0x01
@@ -315,7 +329,7 @@ void main() {
     expect(chip8.memory.getUint8(0x46), 255);
     expect(chip8.memory.getUint8(0x47), 0);
   });
-  test('FX56 - fills V0 to VX inclusive with memory values starting at I', () {
+  test('FX56 fills V0 to VX inclusive with memory values starting at I', () {
     final chip8 = Chip8();
     chip8.indexRegister = 0x42; // set I to 0x42
     chip8.memory.setUint8(0x42, 0x01);

@@ -13,7 +13,9 @@ class Chip8 {
   int indexRegister;
 
   // Program register, 12 bits in size
-  int programCounter = 0;
+  int _programCounter = 0;
+  void set programCounter(int val) => _programCounter = val & 0xFFF;
+  int get programCounter => _programCounter;
 
   // Memory, 4096 bytes in size
   ByteData memory = ByteData.view(Uint8List(4096).buffer);
@@ -31,13 +33,12 @@ class Chip8 {
   // Sound timer
   int soundTimer;
 
-  // Stack, 16 levels deep
-  ByteData stack = ByteData.view(Uint16List(16).buffer);
+  /// Stack
+  final _stack = List<int>();
+  void set push(int val) => _stack.add(val & 0xFFF);
+  int get pop => _stack.removeLast();
 
-  // Stack pointer
-  int stackPointer;
-
-  // Keypad
+  /// Keypad
   final keypad = List.from(List.generate(16, (_) => false), growable: false);
 
   /// Sets a register value, registers numbering from 0..15
@@ -75,6 +76,10 @@ class Chip8 {
           // 00E0 - clears the screen
           display.setAll(0, List.generate(64 * 32, (_) => false));
           return;
+        case 0x0EE:
+          // 00EE - returns from a subroutine
+          // TODO: implement
+          throw Exception();
         default:
           // 0NNN - calls RCA 1802 program at address NNN. Not necessary for most ROMs
           throw Exception();
@@ -84,6 +89,11 @@ class Chip8 {
       // 1NNN - jumps to address NNN
       programCounter = leastSignificantTribble(opcode);
       return;
+    }
+    if (opPrefix == 2) {
+      // 2NNN - calls subroutine at NNN
+      // TODO: implement
+      throw Exception();
     }
     if (opPrefix == 3) {
       // 3XNN - skips the next instruction if VX equals NN

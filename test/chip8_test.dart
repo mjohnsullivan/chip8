@@ -18,9 +18,13 @@ void main() {
     final chip8 = Chip8();
     expect(chip8.display.length, 64 * 32);
   });
-  test('Chip8 has a stack 16 levels deep', () {
+  test('Chip8 has a stack', () {
     final chip8 = Chip8();
-    expect(chip8.stack.lengthInBytes, 16 * 2);
+    chip8.push = 2;
+    chip8.push = 4;
+    expect(chip8.pop, 4);
+    expect(chip8.pop, 2);
+    expect(() => chip8.pop, throwsA(const TypeMatcher<RangeError>()));
   });
   test('Chip8 has a keypad with 16 keys', () {
     final chip8 = Chip8();

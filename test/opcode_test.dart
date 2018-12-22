@@ -27,7 +27,6 @@ void main() {
     chip8.executeOpcode(0x4457); // compares V4 to 0x56
     expect(chip8.programCounter, pc + 2); // pc should increment
   });
-
   test('5XY0 skips the next instruction if VX equals VY', () {
     final chip8 = Chip8();
     final pc = chip8.programCounter;
@@ -168,5 +167,16 @@ void main() {
     chip8.executeOpcode(0x8B0E); // stores and bit shifts
     expect(chip8.registers.getUint8(11), (0xCE << 1) & 0xFF);
     expect(chip8.registers.getUint8(15), 1);
+  });
+  test('9XY0 skips the next instruction if VX is not equal to VY', () {
+    final chip8 = Chip8();
+    final pc = chip8.programCounter;
+    chip8.executeOpcode(0x6456); // puts 0x56 in V4
+    chip8.executeOpcode(0x6556); // puts 0x56 in V5
+    chip8.executeOpcode(0x9450); // compares V4 to V5
+    expect(chip8.programCounter, pc); // pc should not increment
+    chip8.executeOpcode(0x6557); // puts 0x57 in V5
+    chip8.executeOpcode(0x9450); // compares V4 to V5
+    expect(chip8.programCounter, pc + 2); // pc should increment
   });
 }

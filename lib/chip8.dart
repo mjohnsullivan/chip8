@@ -110,6 +110,18 @@ class Chip8 {
     }
     if (opPrefix == 8) {
       executeOpcode8(opcode);
+      return;
+    }
+    if (opPrefix == 9) {
+      // 9XY0 - skips the next instruction if VX doesn't equal VY
+      final vx = secondSignificantNibble(opcode);
+      final xValue = getRegister(vx);
+      final vy = thirdSignificantNibble(opcode);
+      final yValue = getRegister(vy);
+      if (xValue != yValue) {
+        programCounter += 2;
+      }
+      return;
     }
   }
 

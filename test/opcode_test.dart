@@ -2,6 +2,13 @@ import "package:test/test.dart";
 import '../lib/chip8.dart';
 
 void main() {
+  test('0NNN calls RCA 1802 program at address NNN - throws exception', () {
+    final chip8 = Chip8();
+    expect(
+      () => chip8.executeOpcode(0x0000),
+      throwsA(const TypeMatcher<Exception>()),
+    );
+  });
   test('1NNN jumps to address NNN', () {
     final chip8 = Chip8();
     chip8.executeOpcode(0x1234);

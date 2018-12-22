@@ -69,6 +69,17 @@ class Chip8 {
   /// Executes an opcode
   void executeOpcode(int opcode) {
     final opPrefix = mostSignificantNibble(opcode);
+    if (opPrefix == 0) {
+      switch (leastSignificantTribble(opcode)) {
+        case 0x0E0:
+          // 00E0 - clears the screen
+          display.setAll(0, List.generate(64 * 32, (_) => false));
+          return;
+        default:
+          // 0NNN - calls RCA 1802 program at address NNN. Not necessary for most ROMs
+          throw Exception();
+      }
+    }
     if (opPrefix == 1) {
       // 1NNN - jumps to address NNN
       programCounter = leastSignificantTribble(opcode);

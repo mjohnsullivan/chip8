@@ -48,4 +48,14 @@ void main() {
     expect(() => chip8.draw(0, 32, true),
         throwsA(const TypeMatcher<AssertionError>()));
   });
+  test('Chip8 correctly loads a program', () {
+    final program = [0x6001, 0x6102, 0x6203];
+    final chip8 = Chip8();
+    chip8.loadProgram(program);
+    expect(chip8.programMemoryEnd, 0x206);
+    expect(chip8.memory.getUint16(0x200), 0x6001);
+    expect(chip8.memory.getUint16(0x202), 0x6102);
+    expect(chip8.memory.getUint16(0x204), 0x6203);
+    expect(chip8.memory.getUint16(0x206), 0);
+  });
 }

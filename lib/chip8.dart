@@ -4,6 +4,7 @@ import 'package:chip8/font.dart';
 import 'package:chip8/utils.dart';
 
 final fontMemoryBase = 0;
+final programMemoryBase = 0x200;
 
 class Chip8 {
   Chip8() {
@@ -20,15 +21,15 @@ class Chip8 {
   int indexRegister;
 
   // Program register, 12 bits in size
-  int _programCounter = 0;
+  int _programCounter = 0x200;
   void set programCounter(int val) => _programCounter = val & 0xFFF;
   int get programCounter => _programCounter;
 
   // Memory, 4096 bytes in size
   ByteData memory = ByteData.view(Uint8List(4096).buffer);
 
-  // RAM start
-  final ramStart = 0x200;
+  /// End of loaded program in memory
+  var programMemoryEnd = 0;
 
   // Display is 64x32 of binary pixels
   final display =
@@ -90,14 +91,30 @@ class Chip8 {
     return fontMemoryBase + (char * 5);
   }
 
+  /// Loads a program into memory
+  void loadProgram(List<int> program) {
+    for (int i = 0; i < program.length; i++) {
+      memory.setUint16(programMemoryBase + (i * 2), program[i]);
+    }
+    programMemoryEnd = programMemoryBase + (program.length * 2);
+  }
+
+  /// Executes the loaded program
+  void run() {
+    programCounter = programMemoryBase;
+    while (programCounter < programMemoryEnd) {
+      step();
+    }
+  }
+
   /// Execute a single CPU cycle
   void step() {
     // Read the opcode
-    final opcode = 0x00FF; // Dummy opcode
-    // Advance the program counter
-    programCounter += 2;
+    final opcode = memory.getUint16(programCounter);
     // Execute the opcode
     executeOpcode(opcode);
+    // Advance the program counter
+    programCounter += 2;
   }
 
   /// Executes an opcode

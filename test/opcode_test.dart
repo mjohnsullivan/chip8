@@ -25,7 +25,8 @@ void main() {
     final chip8 = Chip8();
     chip8.push = 0x456;
     chip8.executeOpcode(0x00EE);
-    expect(chip8.programCounter, 0x456);
+    // Moves the PC to op before the instruction to offset for step
+    expect(chip8.programCounter, 0x456 - 2);
     expect(() => chip8.executeOpcode(0x00EE),
         throwsA(const TypeMatcher<RangeError>()));
   });
@@ -41,7 +42,8 @@ void main() {
     final chip8 = Chip8();
     chip8.programCounter = 0x135;
     chip8.executeOpcode(0x2579);
-    expect(chip8.programCounter, 0x579);
+    // Moves the PC to op before the instruction to offset for step
+    expect(chip8.programCounter, 0x579 - 2);
     expect(chip8.pop, 0x137);
   });
   test('3XNN skips the next instruction if VX equals NN', () {

@@ -117,10 +117,14 @@ class Chip8 {
   }
 
   /// Executes the loaded program
-  void run() {
+  void run([int maxCycles]) {
+    int cycle = 0;
     programCounter = programMemoryBase;
     while (programCounter < programMemoryEnd) {
       step();
+      if (maxCycles != null && cycle++ >= maxCycles) {
+        break;
+      }
     }
   }
 
@@ -145,7 +149,8 @@ class Chip8 {
           return;
         case 0x0EE:
           // 00EE - returns from a subroutine
-          programCounter = pop;
+          // -2 to offset the advance of the PC in step()
+          programCounter = pop - 2;
           return;
         default:
           // 0NNN - calls RCA 1802 program at address NNN. Not necessary for most ROMs
@@ -164,7 +169,8 @@ class Chip8 {
       // 2NNN - calls subroutine at NNN
       final addr = leastSignificantTribble(opcode);
       push = programCounter + 2;
-      programCounter = addr;
+      // -2 to offset the advance of the PC in step()
+      programCounter = addr - 2;
       return;
     }
     if (opPrefix == 3) {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:chip8/bytes.dart';
@@ -7,6 +8,9 @@ import 'package:chip8/utils.dart';
 
 final fontMemoryBase = 0;
 final programMemoryBase = 0x200;
+
+// TODO: for testing only; remove when not needed
+final random = Random();
 
 class Chip8 {
   Chip8() {
@@ -128,6 +132,19 @@ class Chip8 {
     }
   }
 
+  /// Executes the loading program asychronously
+  /// There's a pause between instruction steps
+  Future runAsync() async {
+    programCounter = programMemoryBase;
+    while (programCounter < programMemoryEnd) {
+      // The delay is just shy of 60Hz
+      await Future.delayed(const Duration(milliseconds: 16), () {
+        step();
+      });
+    }
+    return;
+  }
+
   /// Execute a single CPU cycle
   void step() {
     // Read the opcode
@@ -136,6 +153,15 @@ class Chip8 {
     executeOpcode(opcode);
     // Advance the program counter
     programCounter += 2;
+    _randomizeDisplay();
+    listeners.forEach((listener) => listener());
+  }
+
+  /// Fills the display with random pixels
+  void _randomizeDisplay() {
+    for (int i = 0; i < display.length; i++) {
+      display[i] = random.nextBool();
+    }
   }
 
   /// Executes an opcode
@@ -442,5 +468,12 @@ class Chip8 {
     buffer.write('Memory at ${printBytes(programCounter)}: ');
     buffer.write('${printBytes(memory.getUint64(programCounter), 8)}');
     return buffer.toString();
+  }
+
+  final List<Function> listeners = <Function>[];
+
+  /// Listen for events fired by the chip8 emulator
+  void listen(Function listener) {
+    listeners.add(listener);
   }
 }

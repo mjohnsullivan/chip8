@@ -32,9 +32,10 @@ void main() {
   test('1NNN jumps to address NNN', () {
     final chip8 = Chip8();
     chip8.executeOpcode(0x1234);
-    expect(chip8.programCounter, 0x234);
+    // Moves the PC to op before the instruction to offset for step
+    expect(chip8.programCounter, 0x234 - 2);
     chip8.executeOpcode(0x1CDE);
-    expect(chip8.programCounter, 0xCDE);
+    expect(chip8.programCounter, 0xCDE - 2);
   });
   test('2NNN calls subroutine at NNN', () {
     final chip8 = Chip8();

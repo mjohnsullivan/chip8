@@ -20,16 +20,14 @@ int thirdSignificantNibble(final int word) {
 }
 
 /// Returns the value of the least significant byte from a word
-int leastSignificantByte(final int word) {
-  return word & 0x00FF;
-}
+int leastSignificantByte(final int word) => word & 0x00FF;
 
 /// Returns the value of the least significant nibble from a word
-int leastSignificantNibble(final int word) {
-  return word & 0x000F;
-}
+int leastSignificantNibble(final int word) => word & 0x000F;
 
 /// Returns the value of the least significant tribble (12 bits) from a word
-int leastSignificantTribble(final int word) {
-  return word & 0x0FFF;
-}
+int leastSignificantTribble(final int word) => word & 0x0FFF;
+
+/// Returns a big-Endian word from 2 bytes
+int wordFromBytes(int significantByte, int leastByte) =>
+    ((significantByte & 0xFF) << 8) | (leastByte & 0xFF);

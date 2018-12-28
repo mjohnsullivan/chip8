@@ -1,4 +1,4 @@
-import "package:test/test.dart";
+import 'package:test/test.dart';
 import 'package:chip8/bytes.dart';
 
 void main() {
@@ -36,5 +36,10 @@ void main() {
     expect(leastSignificantNibble(0x1234), 0x4);
     expect(leastSignificantNibble(0xABCD), 0xD);
     expect(leastSignificantNibble(0xFFFF), 0xF);
+  });
+
+  test('word returns a word composed of two bytes', () {
+    final word = wordFromBytes(0x60, 0xE4);
+    expect(word, 0x60E4);
   });
 }

@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:typed_data';
+
 import 'package:chip8/bytes.dart';
 import 'package:chip8/font.dart';
 import 'package:chip8/utils.dart';
@@ -9,6 +11,7 @@ final programMemoryBase = 0x200;
 class Chip8 {
   Chip8() {
     loadFonts();
+    _runTimer();
   }
 
   // 35 opcodes - each 2 bytes in length
@@ -42,10 +45,10 @@ class Chip8 {
   }
 
   // Delay timer
-  int delayTimer;
+  var delayTimer = 0;
 
   // Sound timer
-  int soundTimer;
+  var soundTimer = 0;
 
   /// Stack
   final _stack = List<int>();
@@ -94,9 +97,23 @@ class Chip8 {
   /// Loads a program into memory
   void loadProgram(List<int> program) {
     for (int i = 0; i < program.length; i++) {
-      memory.setUint16(programMemoryBase + (i * 2), program[i]);
+      memory.setUint8(programMemoryBase + i, program[i]);
     }
-    programMemoryEnd = programMemoryBase + (program.length * 2);
+    programMemoryEnd = programMemoryBase + program.length;
+  }
+
+  void _runTimer() {
+    Timer.periodic(Duration(milliseconds: 1000 ~/ 60), (_) {
+      if (delayTimer > 0) {
+        --delayTimer;
+      }
+      if (soundTimer > 0) {
+        --soundTimer;
+        if (soundTimer == 0) {
+          print('BEEEEEP!');
+        }
+      }
+    });
   }
 
   /// Executes the loaded program
@@ -132,12 +149,15 @@ class Chip8 {
           return;
         default:
           // 0NNN - calls RCA 1802 program at address NNN. Not necessary for most ROMs
-          throw Exception();
+          print('RCA program called at address ${printBytes(opcode, 3)}');
+          throw Exception(
+              'RCA program called at address ${printBytes(opcode, 3)}');
       }
     }
     if (opPrefix == 1) {
       // 1NNN - jumps to address NNN
-      programCounter = leastSignificantTribble(opcode);
+      // -2 to offset the advance of the PC in step()
+      programCounter = leastSignificantTribble(opcode) - 2;
       return;
     }
     if (opPrefix == 2) {
@@ -405,5 +425,16 @@ class Chip8 {
         setRegister(vx, xValue << 1);
         return;
     }
+  }
+
+  /// Returns a dump of the emulator state
+  String dump() {
+    final buffer = StringBuffer();
+    buffer.write('Program size: ${memory.lengthInBytes}\n');
+    buffer.write('Program counter: ${printBytes(programCounter)}\n');
+    // Display memory at and after program counter
+    buffer.write('Memory at ${printBytes(programCounter)}: ');
+    buffer.write('${printBytes(memory.getUint64(programCounter), 8)}');
+    return buffer.toString();
   }
 }

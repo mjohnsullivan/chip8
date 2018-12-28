@@ -49,7 +49,7 @@ void main() {
         throwsA(const TypeMatcher<AssertionError>()));
   });
   test('Chip8 correctly loads a program', () {
-    final program = [0x6001, 0x6102, 0x6203];
+    final program = [0x60, 0x01, 0x61, 0x02, 0x62, 0x03];
     final chip8 = Chip8();
     chip8.loadProgram(program);
     expect(chip8.programMemoryEnd, 0x206);

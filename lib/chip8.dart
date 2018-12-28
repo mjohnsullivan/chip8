@@ -36,7 +36,7 @@ class Chip8 {
 
   // Display is 64x32 of binary pixels
   final display =
-      List.from(List.generate(64 * 32, (_) => false), growable: false);
+      List<bool>.from(List.generate(64 * 32, (_) => false), growable: false);
 
   /// Paints a pixel at (x,y)
   void draw(int x, int y, bool value) {

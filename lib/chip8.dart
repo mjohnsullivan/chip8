@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:chip8/bytes.dart';
@@ -8,9 +7,6 @@ import 'package:chip8/utils.dart';
 
 final fontMemoryBase = 0;
 final programMemoryBase = 0x200;
-
-// TODO: for testing only; remove when not needed
-final random = Random();
 
 class Chip8 {
   Chip8() {
@@ -48,11 +44,17 @@ class Chip8 {
     display[(y * 64) + x] = value;
   }
 
-  // Delay timer
+  /// Delay timer
   var delayTimer = 0;
 
-  // Sound timer
+  /// Sound timer
   var soundTimer = 0;
+
+  /// Internal Dart timer to drive the timers
+  Timer timerDriver;
+
+  /// Timer to handle throttling emulator cycles
+  Timer cycleTimer;
 
   /// Stack
   final _stack = List<int>();
@@ -107,7 +109,7 @@ class Chip8 {
   }
 
   void _runTimer() {
-    Timer.periodic(Duration(milliseconds: 1000 ~/ 60), (_) {
+    timerDriver = Timer.periodic(Duration(milliseconds: 1000 ~/ 60), (_) {
       if (delayTimer > 0) {
         --delayTimer;
       }
@@ -135,14 +137,18 @@ class Chip8 {
   /// Executes the loading program asychronously
   /// There's a pause between instruction steps
   Future runAsync() async {
-    programCounter = programMemoryBase;
-    while (programCounter < programMemoryEnd) {
-      // The delay is just shy of 60Hz
-      await Future.delayed(const Duration(milliseconds: 16), () {
+    final completer = Completer();
+    if (cycleTimer == null) {
+      programCounter = programMemoryBase;
+      cycleTimer = Timer.periodic(Duration(milliseconds: 1000 ~/ 60), (_) {
         step();
+        if (programCounter >= programMemoryEnd) {
+          cycleTimer.cancel();
+          completer.complete();
+        }
       });
     }
-    return;
+    return completer.future;
   }
 
   /// Execute a single CPU cycle
@@ -153,14 +159,6 @@ class Chip8 {
     executeOpcode(opcode);
     // Advance the program counter
     programCounter += 2;
-  }
-
-  /// Fills the display with random pixels
-  /// Handy for testing the display
-  void _randomizeDisplay() {
-    for (int i = 0; i < display.length; i++) {
-      display[i] = random.nextBool();
-    }
   }
 
   /// Executes an opcode
@@ -473,10 +471,13 @@ class Chip8 {
   final List<Function> listeners = <Function>[];
 
   /// Listen for events fired by the chip8 emulator
-  void listen(Function listener) {
-    listeners.add(listener);
-  }
+  void listen(Function listener) => listeners.add(listener);
 
   /// Fire a draw event
   void _fireDrawEvent() => listeners.forEach((listener) => listener());
+
+  void dispose() {
+    timerDriver?.cancel();
+    cycleTimer?.cancel();
+  }
 }

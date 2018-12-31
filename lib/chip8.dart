@@ -153,11 +153,10 @@ class Chip8 {
     executeOpcode(opcode);
     // Advance the program counter
     programCounter += 2;
-    _randomizeDisplay();
-    listeners.forEach((listener) => listener());
   }
 
   /// Fills the display with random pixels
+  /// Handy for testing the display
   void _randomizeDisplay() {
     for (int i = 0; i < display.length; i++) {
       display[i] = random.nextBool();
@@ -308,6 +307,7 @@ class Chip8 {
           );
         }
       }
+      _fireDrawEvent();
       return;
     }
     if (opPrefix == 0xE) {
@@ -476,4 +476,7 @@ class Chip8 {
   void listen(Function listener) {
     listeners.add(listener);
   }
+
+  /// Fire a draw event
+  void _fireDrawEvent() => listeners.forEach((listener) => listener());
 }

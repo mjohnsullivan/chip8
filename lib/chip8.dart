@@ -40,8 +40,12 @@ class Chip8 {
 
   /// Paints a pixel at (x,y)
   void draw(int x, int y, bool value) {
-    assert(y >= 0 && y < 32 && x >= 0 && x < 64);
-    display[(y * 64) + x] = value;
+    assert(y >= 0 && x >= 0);
+    // If the draw falls off the right or bottom of the screen,
+    // then ignore, as sprites can be partially shown at the edges
+    if (y < 32 && x < 64) {
+      display[(y * 64) + x] = value;
+    }
   }
 
   /// Delay timer
@@ -178,8 +182,8 @@ class Chip8 {
         default:
           // 0NNN - calls RCA 1802 program at address NNN. Not necessary for most ROMs
           print('RCA program called at address ${printBytes(opcode, 3)}');
-          throw Exception(
-              'RCA program called at address ${printBytes(opcode, 3)}');
+        //throw Exception(
+        //  'RCA program called at address ${printBytes(opcode, 3)}');
       }
     }
     if (opPrefix == 1) {

@@ -72,7 +72,11 @@ String printOpcode(int opcode) {
   final opStr = opcode.toRadixString(16).toUpperCase();
   // 0x00E0
   if (RegExp(r'E0').hasMatch(opStr)) {
-    return '0x00E0 - Clears the screen';
+    return '0x00E0 - clear the screen';
+  }
+  // 0x00EE
+  if (RegExp(r'EE').hasMatch(opStr)) {
+    return '0x00EE - return from a subroutine';
   }
   // 0xANNN
   if (RegExp(r'^A[A-Z0-9][A-Z0-9][A-Z0-9]$').hasMatch(opStr)) {

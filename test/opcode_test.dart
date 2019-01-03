@@ -2,12 +2,16 @@ import "package:test/test.dart";
 import '../lib/chip8.dart';
 
 void main() {
-  test('0NNN calls RCA 1802 program at address NNN - throws exception', () {
+  test('0NNN calls RCA 1802 program at address NNN - does nothing', () {
     final chip8 = Chip8();
+    // Only thing that should happen is the PC increases
+    chip8.executeOpcode(0x0000);
+    /*
     expect(
       () => chip8.executeOpcode(0x0000),
       throwsA(const TypeMatcher<Exception>()),
     );
+    */
   });
   test('00E0 clears the screen', () {
     final chip8 = Chip8();
@@ -240,11 +244,11 @@ void main() {
     chip8.memory.setUint8(0x124, 0x10); // second sprite row
     chip8.indexRegister = 0x123;
     chip8.registers.setUint8(3, 0); // VX - x coordinate
-    chip8.memory.setUint8(4, 0); // VY - y coordinate
+    chip8.registers.setUint8(4, 0); // VY - y coordinate
     chip8.executeOpcode(0xD342);
     for (int i = 0; i < 8; i++) {
       // Test the first byte of the sprite
-      expect(chip8.display[0], true);
+      expect(chip8.display[i], true);
     }
     for (int i = 64; i < 71; i++) {
       if (i == 67) {
@@ -252,6 +256,16 @@ void main() {
         continue;
       }
       expect(chip8.display[i], false);
+    }
+    // Sprites can overflow the right or the bottom
+    chip8.registers.setUint8(3, 60); // VX - x coordinate
+    chip8.registers.setUint8(4, 31); // VY - y coordinate
+    chip8.executeOpcode(0xD342);
+    // Test the partially drawn sprite
+    expect(chip8.display[2043], false);
+    for (int i = 2044; i < 2048; i++) {
+      // Test the first byte of the sprite
+      expect(chip8.display[i], true);
     }
   });
   test('EX9E skips next instruction if the key stored in VX is pressed', () {

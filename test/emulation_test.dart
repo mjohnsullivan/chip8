@@ -72,13 +72,23 @@ void main() {
     expect(chip8.registers.getUint8(2), 1);
   });
 
-  test('emulator runs a sophisticated, binary program', () {
+  test('emulator runs a sophisticated binary program', () {
     final program = File('test/bin/ibm_logo.ch8').readAsBytesSync();
     final chip8 = Chip8();
     chip8.loadProgram(program);
     expect(chip8.programMemoryEnd, 0x200 + 132);
     chip8.run(1000);
     expect(chip8.programCounter, 0x228);
+  });
+
+  test('emulator runs another sophisticated binary program', () {
+    final program =
+        File('test/bin/framed_mk1_samways_1980.ch8').readAsBytesSync();
+    final chip8 = Chip8();
+    chip8.loadProgram(program);
+    expect(chip8.programMemoryEnd, 0x200 + 176);
+    chip8.run(1000);
+    // expect(chip8.programCounter, 0x228);
   });
 
   test('emulator runs asynchronously', () async {

@@ -43,10 +43,8 @@ void main() {
     expect(chip8.display[650], true);
     chip8.draw(63, 31, true);
     expect(chip8.display[2047], true);
-    expect(() => chip8.draw(64, 0, true),
-        throwsA(const TypeMatcher<AssertionError>()));
-    expect(() => chip8.draw(0, 32, true),
-        throwsA(const TypeMatcher<AssertionError>()));
+    chip8.draw(64, 0, true); // nothing happens as this is off the right
+    chip8.draw(0, 32, true); // nothing happens as this is off the bottom
   });
   test('Chip8 correctly loads a program', () {
     final program = [0x60, 0x01, 0x61, 0x02, 0x62, 0x03];

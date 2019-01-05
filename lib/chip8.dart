@@ -446,8 +446,8 @@ class Chip8 {
         setRegister(0xF, subtractedValue >= 0 ? 1 : 0);
         return;
       case 6: // 8XY6 - stores the least significant bit of VX in VF and then shifts VX to the right by 1
-        setRegister(0xF, xValue & 0x1);
-        setRegister(vx, xValue >> 1);
+        setRegister(0xF, yValue & 0x1);
+        setRegister(vx, yValue >> 1);
         return;
       case 7: // 8XY7 - sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't
         final subtractedValue = yValue - xValue;

@@ -105,5 +105,51 @@ String printOpcode(int opcode) {
   if (RegExp(r'^1[A-Z0-9][A-Z0-9][A-Z0-9]$').hasMatch(opStr)) {
     return '${printBytes(opcode)} - jump to ${printBytes(leastSignificantTribble(opcode))}';
   }
+  // 0x2NNN
+  if (RegExp(r'^2[A-Z0-9][A-Z0-9][A-Z0-9]$').hasMatch(opStr)) {
+    return '${printBytes(opcode)} - call subroutine at ${printBytes(leastSignificantTribble(opcode))}';
+  }
+  // 0x3XNN
+  if (RegExp(r'^3[A-Z0-9][A-Z0-9][A-Z0-9]$').hasMatch(opStr)) {
+    final vx = secondSignificantNibble(opcode);
+    final val = leastSignificantByte(opcode);
+    return '${printBytes(opcode)} - Skips the next instruction if V$vx equals $val';
+  }
+  //0x8XY6
+  if (RegExp(r'^8[A-Z0-9][A-Z0-9]6$').hasMatch(opStr)) {
+    final vx = secondSignificantNibble(opcode);
+    final vy = thirdSignificantNibble(opcode);
+    return '${printBytes(opcode)} - stores the value in V$vy shifted right one bit in V$vx; sets VF to the least significant bit prior to the shift';
+  }
+  // 0xFX29
+  if (RegExp(r'^F[A-Z0-9]29$').hasMatch(opStr)) {
+    final vx = secondSignificantNibble(opcode);
+    return '${printBytes(opcode)} - point I to font char in V$vx';
+  }
+  // 0xFX0A
+  if (RegExp(r'^F[A-Z0-9]0A$').hasMatch(opStr)) {
+    final vx = secondSignificantNibble(opcode);
+    return '${printBytes(opcode)} - key press is awaited, and then stored in V$vx';
+  }
+  // 0xFX07
+  if (RegExp(r'^F[A-Z0-9]07$').hasMatch(opStr)) {
+    final vx = secondSignificantNibble(opcode);
+    return '${printBytes(opcode)} - sets V$vx to the value of the delay timer';
+  }
+  // 0xFX15
+  if (RegExp(r'^F[A-Z0-9]15$').hasMatch(opStr)) {
+    final vx = secondSignificantNibble(opcode);
+    return '${printBytes(opcode)} - sets the delay timer to V$vx';
+  }
+  // 0xFX55
+  if (RegExp(r'^F[A-Z0-9]55$').hasMatch(opStr)) {
+    final vx = secondSignificantNibble(opcode);
+    return '${printBytes(opcode)} - stores V0 to V$vx in memory starting at I';
+  }
+  // 0xFX1E
+  if (RegExp(r'^F[A-Z0-9]1E$').hasMatch(opStr)) {
+    final vx = secondSignificantNibble(opcode);
+    return '${printBytes(opcode)} - adds V$vx to I';
+  }
   return '${printBytes(opcode)} - ??';
 }

@@ -171,16 +171,21 @@ void main() {
     expect(chip8.registers.getUint8(11), (0xCD - 0xDE) & 0x00FF);
     expect(chip8.registers.getUint8(15), 0);
   });
-  test('8XY6 stores the VX least significant bit in VF, shifts VX right by 1',
+  test(
+      '8XY6 stores the value in VY shifted right one bit in VX; sets VF to the least significant bit prior to the shift',
       () {
     final chip8 = Chip8();
-    chip8.executeOpcode(0x6045); // store 0x45 in V0
-    chip8.executeOpcode(0x8006); // stores and bit shifts
-    expect(chip8.registers.getUint8(0), 0x45 >> 1);
+    chip8.executeOpcode(0x6145); // store 0x45 in V1
+    chip8.executeOpcode(
+        0x8016); // stores 0x45 shifted by 1 bit in V0; least bit stored in VF
+    expect(chip8.registers.getUint8(1), 0x45); // V1 doesn't change
+    expect(chip8.registers.getUint8(0), 0x45 >> 1); // V0 has shifted value
     expect(chip8.registers.getUint8(15), 1);
-    chip8.executeOpcode(0x6BCE); // store 0xCD in V11
-    chip8.executeOpcode(0x8B06); // stores and bit shifts
-    expect(chip8.registers.getUint8(11), 0xCE >> 1);
+    chip8.executeOpcode(0x6BCE); // store 0xCE in V11
+    chip8.executeOpcode(
+        0x8AB6); // stores 0xCE shifted by 1 bit in VB; least bit stored in VF
+    expect(chip8.registers.getUint8(11), 0xCE);
+    expect(chip8.registers.getUint8(10), 0xCE >> 1);
     expect(chip8.registers.getUint8(15), 0);
   });
   test('8XY7 VX subtracted from VY, VF is set to 0 when borrow, 1 otherwise',

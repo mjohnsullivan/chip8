@@ -455,8 +455,8 @@ class Chip8 {
         setRegister(0xF, subtractedValue >= 0 ? 1 : 0);
         return;
       case 0xE: // 8XYE - stores the most significant bit of VX in VF and then shifts VX to the left by 1
-        setRegister(0xF, xValue >> 7);
-        setRegister(vx, xValue << 1);
+        setRegister(0xF, yValue >> 7);
+        setRegister(vx, yValue << 1);
         return;
     }
   }

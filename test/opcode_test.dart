@@ -202,16 +202,21 @@ void main() {
     expect(chip8.registers.getUint8(11), 0xDE - 0xCD);
     expect(chip8.registers.getUint8(15), 1);
   });
-  test('8XYE stores the VX most significant bit in VF, shifts VX left by 1',
+  test(
+      'stores the value in VY shifted left one bit in VX; sets VF to the most significant bit prior to the shift',
       () {
     final chip8 = Chip8();
-    chip8.executeOpcode(0x6045); // store 0x45 in V0
-    chip8.executeOpcode(0x800E); // stores and bit shifts
+    chip8.executeOpcode(0x6145); // store 0x45 in V1
+    chip8.executeOpcode(
+        0x801E); // stores 0x45 left shifted by 1 bit in V0; most bit stored in VF
+    expect(chip8.registers.getUint8(1), 0x45);
     expect(chip8.registers.getUint8(0), (0x45 << 1) & 0xFF);
     expect(chip8.registers.getUint8(15), 0);
-    chip8.executeOpcode(0x6BCE); // store 0x12 in V11
-    chip8.executeOpcode(0x8B0E); // stores and bit shifts
-    expect(chip8.registers.getUint8(11), (0xCE << 1) & 0xFF);
+    chip8.executeOpcode(0x6BCE); // store 0xCE in V11
+    chip8.executeOpcode(
+        0x8ABE); // stores 0xCE left shifted by 1 bit in VA; most bit stored in VF
+    expect(chip8.registers.getUint8(11), 0xCE);
+    expect(chip8.registers.getUint8(10), (0xCE << 1) & 0xFF);
     expect(chip8.registers.getUint8(15), 1);
   });
   test('9XY0 skips the next instruction if VX is not equal to VY', () {

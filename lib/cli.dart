@@ -121,6 +121,12 @@ String printOpcode(int opcode) {
     final vy = thirdSignificantNibble(opcode);
     return '${printBytes(opcode)} - stores the value in V$vy shifted right one bit in V$vx; sets VF to the least significant bit prior to the shift';
   }
+  //0x8XYE
+  if (RegExp(r'^8[A-Z0-9][A-Z0-9]E$').hasMatch(opStr)) {
+    final vx = secondSignificantNibble(opcode);
+    final vy = thirdSignificantNibble(opcode);
+    return '${printBytes(opcode)} - stores the value in V$vy shifted left one bit in V$vx; sets VF to the most significant bit prior to the shift';
+  }
   // 0xFX29
   if (RegExp(r'^F[A-Z0-9]29$').hasMatch(opStr)) {
     final vx = secondSignificantNibble(opcode);

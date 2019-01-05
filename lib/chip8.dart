@@ -144,7 +144,7 @@ class Chip8 {
     final completer = Completer();
     if (cycleTimer == null) {
       programCounter = programMemoryBase;
-      cycleTimer = Timer.periodic(Duration(milliseconds: 1000 ~/ 60), (_) {
+      cycleTimer = Timer.periodic(Duration(milliseconds: 1), (_) {
         step();
         if (programCounter >= programMemoryEnd) {
           cycleTimer.cancel();
@@ -472,10 +472,14 @@ class Chip8 {
     return buffer.toString();
   }
 
-  final List<Function> listeners = <Function>[];
+  /// Subscribed listeners
+  final Set<Function> listeners = Set<Function>();
 
   /// Listen for events fired by the chip8 emulator
   void listen(Function listener) => listeners.add(listener);
+
+  /// Remove a listener
+  void remove(Function listener) => listeners.remove(listener);
 
   /// Fire a draw event
   void _fireDrawEvent() => listeners.forEach((listener) => listener());

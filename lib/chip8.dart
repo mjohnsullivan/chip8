@@ -41,11 +41,12 @@ class Chip8 {
   /// Paints a pixel at (x,y)
   void draw(int x, int y, bool value) {
     assert(y >= 0 && x >= 0);
-    // If the draw falls off the right or bottom of the screen,
-    // then ignore, as sprites can be partially shown at the edges
-    if (y < 32 && x < 64) {
-      display[(y * 64) + x] = value;
-    }
+    // Wrap drawing horizontally if sprite overdraws to the right
+    if (x >= 64) x = x % 64;
+    // Wrap drawing vertically if sprite overdraws at the bottom
+    if (y >= 32) y = y % 32;
+    // Draw the pixel
+    display[(y * 64) + x] = value;
   }
 
   /// Delay timer

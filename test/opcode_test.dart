@@ -267,14 +267,51 @@ void main() {
       }
       expect(chip8.display[i], false);
     }
-    // Sprites can overflow the right or the bottom
+  });
+  test('DXYN draws a sprite that overflows correctly horizontally', () {
+    final chip8 = Chip8();
+    chip8.memory.setUint8(0x123, 0xFF); // first sprite row data
+    chip8.indexRegister = 0x123;
     chip8.registers.setUint8(3, 60); // VX - x coordinate
+    chip8.registers.setUint8(4, 0); // VY - y coordinate
+    // Test the display is blank
+    for (int i = 0; i < 4; i++) {
+      expect(chip8.display[i], false);
+    }
+    for (int i = 60; i < 64; i++) {
+      expect(chip8.display[i], false);
+    }
+    // Draw the sprite
+    chip8.executeOpcode(0xD341);
+    for (int i = 0; i < 4; i++) {
+      // Sprite has overflowed to the left side of the screen
+      expect(chip8.display[i], true);
+    }
+    for (int i = 60; i < 64; i++) {
+      expect(chip8.display[i], true);
+    }
+  });
+  test('DXYN draws a sprite that overflows correctly vertically', () {
+    final chip8 = Chip8();
+    chip8.memory.setUint8(0x123, 0xFF); // first sprite row data
+    chip8.memory.setUint8(0x124, 0xFF); // second sprite row data
+    chip8.indexRegister = 0x123;
+    chip8.registers.setUint8(3, 0); // VX - x coordinate
     chip8.registers.setUint8(4, 31); // VY - y coordinate
+    // Test the display is blank
+    for (int i = 0; i < 8; i++) {
+      expect(chip8.display[i], false);
+    }
+    for (int i = 1984; i < 1992; i++) {
+      expect(chip8.display[i], false);
+    }
+    // Draw the sprite
     chip8.executeOpcode(0xD342);
-    // Test the partially drawn sprite
-    expect(chip8.display[2043], false);
-    for (int i = 2044; i < 2048; i++) {
-      // Test the first byte of the sprite
+    for (int i = 0; i < 8; i++) {
+      // Sprite has overflowed the bottom of the screen
+      expect(chip8.display[i], true);
+    }
+    for (int i = 1984; i < 1992; i++) {
       expect(chip8.display[i], true);
     }
   });

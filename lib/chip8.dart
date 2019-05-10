@@ -18,7 +18,7 @@ class Chip8 {
   final opcodes = ByteData.view(Uint16List(35).buffer);
 
   // 16 registers; 15 general and 16th for carry flag
-  final ByteData registers = ByteData.view(Uint8List(16).buffer);
+  final registers = ByteData.view(Uint8List(16).buffer);
 
   // Index register, 12 bits in size
   int indexRegister;
@@ -29,7 +29,7 @@ class Chip8 {
   int get programCounter => _programCounter;
 
   // Memory, 4096 bytes in size
-  ByteData memory = ByteData.view(Uint8List(4096).buffer);
+  final memory = ByteData.view(Uint8List(4096).buffer);
 
   /// End of loaded program in memory
   var programMemoryEnd = 0;
@@ -65,7 +65,7 @@ class Chip8 {
   Timer cycleTimer;
 
   /// Stack
-  final _stack = List<int>();
+  final _stack = <int>[];
   void set push(int val) => _stack.add(val & 0xFFF);
   int get pop => _stack.removeLast();
 
@@ -117,14 +117,11 @@ class Chip8 {
 
   void _runTimer() {
     timerDriver = Timer.periodic(Duration(milliseconds: 1000 ~/ 60), (_) {
-      if (delayTimer > 0) {
-        --delayTimer;
-      }
+      if (delayTimer > 0) --delayTimer;
+
       if (soundTimer > 0) {
         --soundTimer;
-        if (soundTimer == 0) {
-          print('BEEEEEP!');
-        }
+        if (soundTimer == 0) print('BEEEEEP!');
       }
     });
   }
@@ -135,16 +132,14 @@ class Chip8 {
     programCounter = programMemoryBase;
     while (programCounter < programMemoryEnd) {
       step();
-      if (maxCycles != null && cycle++ >= maxCycles) {
-        break;
-      }
+      if (maxCycles != null && cycle++ >= maxCycles) break;
     }
   }
 
   /// Executes the loading program asychronously
   /// There's a pause between instruction steps
   Future runAsync() async {
-    final completer = Completer();
+    final completer = Completer<Null>();
     if (cycleTimer == null) {
       programCounter = programMemoryBase;
       cycleTimer = Timer.periodic(Duration(milliseconds: 1), (_) {

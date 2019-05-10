@@ -103,10 +103,9 @@ class Chip8 {
   }
 
   /// Returns the memory location of a sprite for the character
-  int fontLocation(int char) {
-    assert(char >= 0 && char <= 0xF);
-    return fontMemoryBase + (char * 5);
-  }
+  int fontLocation(int char) =>
+      // Ensure the char value is 0-15
+      fontMemoryBase + ((char & 0xf) * 5);
 
   /// Loads a program into memory
   void loadProgram(List<int> program) {

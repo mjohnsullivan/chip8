@@ -23,7 +23,7 @@ For more information, see https://github.com/mjohnsullivan/chip8
 
 /// Start linting from the command-line.
 Future run(List<String> args) async {
-  var parser = ArgParser(allowTrailingOptions: true);
+  final parser = ArgParser(allowTrailingOptions: true);
 
   parser
     ..addFlag('help',
@@ -53,67 +53,78 @@ Future run(List<String> args) async {
   if (options['dump']) {
     final program = File(options.rest[0]).readAsBytesSync();
     assert(program.length % 2 == 0);
+    print('Address  -- OpCpode -- Description');
+    print('==================================');
     for (int i = 0; i < program.length - 1; i += 2) {
       final upperByte = program[i];
       final lowerByte = program[i + 1];
       final word = ((upperByte & 0xFF) << 8) | (lowerByte & 0xFF);
-      print('${printBytes(i + 0x200, 3)} -- ' + printOpcode(word));
+      print('${printBytes(i + 0x200, 3)} -- ${printOpcode(word)}');
     }
     return;
   }
 
   if (options['assemble']) {
-    writeMachineCode(options.rest[0]);
+    assemble(['CLS']).forEach(
+      (byte) => print('${printBytes(byte)}\n'),
+    );
   }
 }
 
 /// Pretty prints opcodes
 String printOpcode(int opcode) {
+  final padding = 12;
   final opStr = opcode.toRadixString(16).toUpperCase();
   // 0x00E0
   if (RegExp(r'E0').hasMatch(opStr)) {
-    return '0x00E0 - clear the screen';
+    return '0x00E0 -- CLS';
   }
   // 0x00EE
   if (RegExp(r'EE').hasMatch(opStr)) {
-    return '0x00EE - return from a subroutine';
+    return '0x00EE -- RET';
   }
   // 0xANNN
   if (RegExp(r'^A[A-Z0-9][A-Z0-9][A-Z0-9]$').hasMatch(opStr)) {
-    return '${printBytes(opcode)} - put ${printBytes(leastSignificantTribble(opcode))} in index register';
+    return '${printBytes(opcode)} -- LD I, ${printBytes(leastSignificantTribble(opcode))}';
   }
   // 0x6XNN
   if (RegExp(r'^6[A-Z0-9][A-Z0-9][A-Z0-9]$').hasMatch(opStr)) {
     final vx = secondSignificantNibble(opcode);
     final value = leastSignificantByte(opcode);
-    return '${printBytes(opcode)} - put ${printBytes(value)} in V$vx';
+    return '${printBytes(opcode)} -- LD V$vx, ${printBytes(value)} -- puts ${printBytes(value)} in V$vx';
   }
   // 0x7XNN
   if (RegExp(r'^7[A-Z0-9][A-Z0-9][A-Z0-9]$').hasMatch(opStr)) {
     final vx = secondSignificantNibble(opcode);
     final value = leastSignificantByte(opcode);
-    return '${printBytes(opcode)} - add ${printBytes(value)} to V$vx';
+    return '${printBytes(opcode)} -- ADD V$vx, ${printBytes(value)}';
   }
-  // 0xDXYN
+  // 0xDxyn
   if (RegExp(r'^D[A-Z0-9][A-Z0-9][A-Z0-9]$').hasMatch(opStr)) {
     final vx = secondSignificantNibble(opcode);
     final vy = thirdSignificantNibble(opcode);
     final height = leastSignificantNibble(opcode);
-    return '${printBytes(opcode)} - draw at (V$vx, V$vy) for height $height';
+    return '${printBytes(opcode)} -- DRW V$vx, V$vy, $height -- displays $height-byte sprite starting at I at (V$vx, V$vy), set VF = collision';
   }
   // 0x1NNN
   if (RegExp(r'^1[A-Z0-9][A-Z0-9][A-Z0-9]$').hasMatch(opStr)) {
-    return '${printBytes(opcode)} - jump to ${printBytes(leastSignificantTribble(opcode))}';
+    return '${printBytes(opcode)} -- JP ${printBytes(leastSignificantTribble(opcode))}';
   }
   // 0x2NNN
   if (RegExp(r'^2[A-Z0-9][A-Z0-9][A-Z0-9]$').hasMatch(opStr)) {
-    return '${printBytes(opcode)} - call subroutine at ${printBytes(leastSignificantTribble(opcode))}';
+    return '${printBytes(opcode)} -- CALL ${printBytes(leastSignificantTribble(opcode))}';
   }
-  // 0x3XNN
+  // 0x3xkk
   if (RegExp(r'^3[A-Z0-9][A-Z0-9][A-Z0-9]$').hasMatch(opStr)) {
     final vx = secondSignificantNibble(opcode);
     final val = leastSignificantByte(opcode);
-    return '${printBytes(opcode)} - Skips the next instruction if V$vx equals $val';
+    return '${printBytes(opcode)} -- SE V$vx, ${printBytes(val)} -- Skips next instruction if V$vx = ${printBytes(val)}';
+  }
+  //0x4xkk
+  if (RegExp(r'^4[A-Z0-9][A-Z0-9][A-Z0-9]$').hasMatch(opStr)) {
+    final vx = secondSignificantNibble(opcode);
+    final val = leastSignificantByte(opcode);
+    return '${printBytes(opcode)} -- SNE V$vx, ${printBytes(val)} -- skips next instruction if V$vx != ${printBytes(val)}';
   }
   //0x8XY6
   if (RegExp(r'^8[A-Z0-9][A-Z0-9]6$').hasMatch(opStr)) {
@@ -126,6 +137,12 @@ String printOpcode(int opcode) {
     final vx = secondSignificantNibble(opcode);
     final vy = thirdSignificantNibble(opcode);
     return '${printBytes(opcode)} - stores the value in V$vy shifted left one bit in V$vx; sets VF to the most significant bit prior to the shift';
+  }
+  // 0xCxkk
+  if (RegExp(r'^C[A-Z0-9][A-Z0-9][A-Z0-9]$').hasMatch(opStr)) {
+    final vx = secondSignificantNibble(opcode);
+    final val = leastSignificantByte(opcode);
+    return '${printBytes(opcode)} -- RND V$vx ${printBytes(val)} -- sets V$vx to a random byte AND ${printBytes(val)}';
   }
   // 0xFX29
   if (RegExp(r'^F[A-Z0-9]29$').hasMatch(opStr)) {
@@ -162,5 +179,5 @@ String printOpcode(int opcode) {
     final vx = secondSignificantNibble(opcode);
     return '${printBytes(opcode)} - fills V0 to V$vx inclusive with values stored starting at address I; I set to I+X+1 after operation';
   }
-  return '${printBytes(opcode)} - ??';
+  return '${printBytes(opcode)} -- no-op';
 }

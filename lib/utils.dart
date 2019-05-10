@@ -17,3 +17,7 @@ String printBytes(int num, [int numBytes = 2]) {
   buffer.insert(0, '0x');
   return buffer.join('');
 }
+
+/// Pads a string with whitespace to a specified size
+String pad(String str, int size) =>
+    (str.length > size) ? str.substring(0, size) : str.padRight(size);

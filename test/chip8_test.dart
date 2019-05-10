@@ -30,21 +30,30 @@ void main() {
     final chip8 = Chip8();
     expect(chip8.keypad.length, 16);
   });
-  test('Chip8 draws pixels to the display', () {
+  test('Chip8 XORs pixels to the display', () {
     final chip8 = Chip8();
     expect(chip8.display[0], false);
+    // XOR 0 and 1
     chip8.draw(0, 0, true);
     expect(chip8.display[0], true);
+    // XOR 1 and 0
+    chip8.draw(0, 0, false);
+    expect(chip8.display[0], true);
+    // XOR 1 and 1
+    chip8.draw(0, 0, true);
+    expect(chip8.display[0], false);
+    // XOR 0 and 0
     chip8.draw(0, 0, false);
     expect(chip8.display[0], false);
+    // Test random pixels around the screen
     chip8.draw(0, 1, true);
     expect(chip8.display[64], true);
     chip8.draw(10, 10, true);
     expect(chip8.display[650], true);
     chip8.draw(63, 31, true);
     expect(chip8.display[2047], true);
-    chip8.draw(64, 0, true); // nothing happens as this is off the right
-    chip8.draw(0, 32, true); // nothing happens as this is off the bottom
+    chip8.draw(64, 0, true); // nothing happens as this is out of bounds
+    chip8.draw(0, 32, true); // nothing happens as this is out of bounds
   });
   test('Chip8 correctly loads a program', () {
     final program = [0x60, 0x01, 0x61, 0x02, 0x62, 0x03];

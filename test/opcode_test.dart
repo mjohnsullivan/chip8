@@ -315,6 +315,34 @@ void main() {
       expect(chip8.display[i], true);
     }
   });
+  test('DXYN registers collisions when drawing sprites', () {
+    final chip8 = Chip8();
+    chip8.memory.setUint8(0x123, 0x01); // first sprite row data
+    chip8.indexRegister = 0x123;
+    chip8.registers.setUint8(3, 0); // VX - x coordinate
+    chip8.registers.setUint8(4, 0); // VY - y coordinate
+    // Test the pixel is off and VF is 0
+    expect(chip8.display[7], false);
+    expect(chip8.registers.getUint8(15), 0x00);
+    chip8.executeOpcode(0xD341);
+    // Test the pixel is on and VF is 0 (no collision)
+    expect(chip8.display[7], true);
+    expect(chip8.registers.getUint8(15), 0x00);
+    chip8.executeOpcode(0xD341);
+    // Test the pixel is off and VF is 1 (collision)
+    expect(chip8.display[7], false);
+    expect(chip8.registers.getUint8(15), 0x01);
+    chip8.registers.setUint8(15, 0);
+    chip8.memory.setUint8(0x123, 0x02);
+    chip8.executeOpcode(0xD341);
+    // Test the new pixel is on and VF is 0 (no collision)
+    expect(chip8.display[6], true);
+    expect(chip8.registers.getUint8(15), 0x00);
+    chip8.executeOpcode(0xD341);
+    // Test the new pixel is off and VF is 1 (no collision)
+    expect(chip8.display[6], false);
+    expect(chip8.registers.getUint8(15), 0x01);
+  });
   test('EX9E skips next instruction if the key stored in VX is pressed', () {
     final chip8 = Chip8();
     final pc = chip8.programCounter;

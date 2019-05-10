@@ -38,15 +38,18 @@ class Chip8 {
   final display =
       List<bool>.from(List.generate(64 * 32, (_) => false), growable: false);
 
-  /// Paints a pixel at (x,y)
-  void draw(int x, int y, bool value) {
+  /// Paints a pixel at (x,y), returning true if a collision occurs
+  bool draw(int x, int y, bool value) {
     assert(y >= 0 && x >= 0);
     // Wrap drawing horizontally if sprite overdraws to the right
     if (x >= 64) x = x % 64;
     // Wrap drawing vertically if sprite overdraws at the bottom
     if (y >= 32) y = y % 32;
+    // Is a collision going to occur?
+    final collision = display[(y * 64) + x] && value;
     // Draw the pixel, by XORing the current display value to the new value
     display[(y * 64) + x] = display[(y * 64) + x] != value;
+    return collision;
   }
 
   /// Delay timer
@@ -295,6 +298,7 @@ class Chip8 {
       final xCoord = getRegister(vx);
       final yCoord = getRegister(vy);
       var memoryPointer = indexRegister;
+      var collision = false;
 
       // Iterate through each row
       // e.g. to draw a row, i.e. single byte of pixels
@@ -304,13 +308,17 @@ class Chip8 {
       for (int row = 0; row < spriteHeight; row++) {
         final spriteByte = memory.getUint8(memoryPointer++);
         for (int bit = 7; bit >= 0; bit--) {
-          draw(
-            xCoord + (7 - bit),
-            yCoord + row,
-            (spriteByte >> bit & 0x01) == 0x01,
-          );
+          collision = draw(
+                xCoord + (7 - bit),
+                yCoord + row,
+                (spriteByte >> bit & 0x01) == 0x01,
+              ) ||
+              collision;
         }
       }
+      // Set the carry flag register to the collision value
+      setRegister(0xF, collision ? 1 : 0);
+
       _fireDrawEvent();
       return;
     }

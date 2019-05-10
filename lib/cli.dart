@@ -6,19 +6,9 @@ import 'package:chip8/bytes.dart';
 import 'package:chip8/utils.dart';
 
 void printUsage(ArgParser parser, [String error]) {
-  final out = StringBuffer();
-  var message = 'Chip8 emulator tools';
-  if (error != null) {
-    message = error;
-  }
-
-  out.writeln('''$message
-Usage: chip8 <file>
-${parser.usage}
-For more information, see https://github.com/mjohnsullivan/chip8
-''');
-
-  print(out.toString());
+  final message = error ?? 'Chip8 emulator tools';
+  print('$message\n\nUsage: chip8 <file>\n${parser.usage}');
+  print('\n\nFor more information, see https://github.com/mjohnsullivan/chip8');
 }
 
 /// Start linting from the command-line.

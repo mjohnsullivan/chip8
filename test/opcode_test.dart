@@ -172,19 +172,17 @@ void main() {
     expect(chip8.registers.getUint8(15), 0);
   });
   test(
-      '8XY6 stores the value in VY shifted right one bit in VX; sets VF to the least significant bit prior to the shift',
+      '8XY6 stores the value in VX shifted right one bit in VX; sets VF to the least significant bit prior to the shift',
       () {
     final chip8 = Chip8();
-    chip8.executeOpcode(0x6145); // store 0x45 in V1
+    chip8.executeOpcode(0x6045); // store 0x45 in V0
     chip8.executeOpcode(
         0x8016); // stores 0x45 shifted by 1 bit in V0; least bit stored in VF
-    expect(chip8.registers.getUint8(1), 0x45); // V1 doesn't change
     expect(chip8.registers.getUint8(0), 0x45 >> 1); // V0 has shifted value
     expect(chip8.registers.getUint8(15), 1);
-    chip8.executeOpcode(0x6BCE); // store 0xCE in V11
+    chip8.executeOpcode(0x6ACE); // store 0xCE in V10
     chip8.executeOpcode(
-        0x8AB6); // stores 0xCE shifted by 1 bit in VB; least bit stored in VF
-    expect(chip8.registers.getUint8(11), 0xCE);
+        0x8AB6); // stores 0xCE shifted by 1 bit in VA; least bit stored in VF
     expect(chip8.registers.getUint8(10), 0xCE >> 1);
     expect(chip8.registers.getUint8(15), 0);
   });
@@ -203,19 +201,17 @@ void main() {
     expect(chip8.registers.getUint8(15), 1);
   });
   test(
-      'stores the value in VY shifted left one bit in VX; sets VF to the most significant bit prior to the shift',
+      '8XYE stores the value in VX shifted left one bit in VX; sets VF to the most significant bit prior to the shift',
       () {
     final chip8 = Chip8();
-    chip8.executeOpcode(0x6145); // store 0x45 in V1
+    chip8.executeOpcode(0x6045); // store 0x45 in V0
     chip8.executeOpcode(
         0x801E); // stores 0x45 left shifted by 1 bit in V0; most bit stored in VF
-    expect(chip8.registers.getUint8(1), 0x45);
     expect(chip8.registers.getUint8(0), (0x45 << 1) & 0xFF);
     expect(chip8.registers.getUint8(15), 0);
-    chip8.executeOpcode(0x6BCE); // store 0xCE in V11
+    chip8.executeOpcode(0x6ACE); // store 0xCE in VA
     chip8.executeOpcode(
         0x8ABE); // stores 0xCE left shifted by 1 bit in VA; most bit stored in VF
-    expect(chip8.registers.getUint8(11), 0xCE);
     expect(chip8.registers.getUint8(10), (0xCE << 1) & 0xFF);
     expect(chip8.registers.getUint8(15), 1);
   });
@@ -418,11 +414,16 @@ void main() {
   test('FX33 stores digits of VX in I, I+1, and I+2', () {
     final chip8 = Chip8();
     chip8.indexRegister = 0x400;
-    chip8.registers.setUint8(0, 254); // set V0 to 456 (decimal)
+    chip8.registers.setUint8(0, 254); // set V0 to 254 (decimal)
     chip8.executeOpcode(0xF033);
     expect(chip8.memory.getUint8(chip8.indexRegister), 2);
     expect(chip8.memory.getUint8(chip8.indexRegister + 1), 5);
     expect(chip8.memory.getUint8(chip8.indexRegister + 2), 4);
+    chip8.registers.setUint8(0, 35); // set V0 to 35 (decimal)
+    chip8.executeOpcode(0xF033);
+    expect(chip8.memory.getUint8(chip8.indexRegister), 0);
+    expect(chip8.memory.getUint8(chip8.indexRegister + 1), 3);
+    expect(chip8.memory.getUint8(chip8.indexRegister + 2), 5);
   });
   test('FX55 stores V0 to VX inclusive in memory starting at address I', () {
     final chip8 = Chip8();
@@ -441,7 +442,7 @@ void main() {
     expect(chip8.memory.getUint8(0x204), 255);
     expect(chip8.memory.getUint8(0x205), 0);
   });
-  test('FX56 fills V0 to VX inclusive with memory values starting at I', () {
+  test('FX65 fills V0 to VX inclusive with memory values starting at I', () {
     final chip8 = Chip8();
     chip8.indexRegister = 0x42; // set I to 0x42
     chip8.memory.setUint8(0x42, 0x01);
@@ -449,7 +450,7 @@ void main() {
     chip8.memory.setUint8(0x44, 0x03);
     chip8.memory.setUint8(0x45, 0x10);
     chip8.memory.setUint8(0x46, 0xFF);
-    chip8.executeOpcode(0xF456); // move memory to V0 - V4
+    chip8.executeOpcode(0xF465); // move memory to V0 - V4
     expect(chip8.indexRegister, 0x42); // I does not change
     expect(chip8.registers.getUint8(0), 1);
     expect(chip8.registers.getUint8(1), 2);

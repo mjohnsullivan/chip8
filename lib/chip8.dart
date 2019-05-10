@@ -405,8 +405,8 @@ class Chip8 {
             memory.setInt8(memoryPointer++, value);
           }
           return;
-        case 0x56:
-          // FX56 - fills V0 to VX (including VX) with values from memory starting at
+        case 0x65:
+          // FX65 - fills V0 to VX (including VX) with values from memory starting at
           // address I. The offset from I is increased by 1 for each value written,
           // but I itself is left unmodified
           final vx = secondSignificantNibble(opcode);
@@ -450,17 +450,17 @@ class Chip8 {
         setRegister(0xF, xValue > yValue ? 1 : 0);
         return;
       case 6: // 8XY6 - stores the least significant bit of VX in VF and then shifts VX to the right by 1
-        setRegister(0xF, yValue & 0x1);
-        setRegister(vx, yValue >> 1);
+        setRegister(0xF, xValue & 0x1);
+        setRegister(vx, xValue >> 1);
         return;
       case 7: // 8XY7 - sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't
         final subtractedValue = yValue - xValue;
         setRegister(vx, subtractedValue);
         setRegister(0xF, yValue > xValue ? 1 : 0);
         return;
-      case 0xE: // 8XYE - stores the most significant bit of VX in VF and then shifts VX to the left by 1
-        setRegister(0xF, yValue >> 7);
-        setRegister(vx, yValue << 1);
+      case 0xE: // 8XYE - if the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0, then Vx is multiplied by 2
+        setRegister(0xF, xValue >> 7);
+        setRegister(vx, xValue << 1);
         return;
     }
   }

@@ -181,9 +181,10 @@ class Chip8 {
           return;
         default:
           // 0NNN - calls RCA 1802 program at address NNN. Not necessary for most ROMs
-          print('RCA program called at address ${printBytes(opcode, 3)}');
-        //throw Exception(
-        //  'RCA program called at address ${printBytes(opcode, 3)}');
+          // print('RCA program called at address ${printBytes(opcode, 3)}');
+          //throw Exception(
+          //  'RCA program called at address ${printBytes(opcode, 3)}');
+          return;
       }
     }
     if (opPrefix == 1) {
@@ -443,7 +444,7 @@ class Chip8 {
       case 5: // 8XY5 - VY is subtracted from VX, VF is set to 0 when there's a borrow, and 1 when there isn't
         final subtractedValue = xValue - yValue;
         setRegister(vx, subtractedValue);
-        setRegister(0xF, subtractedValue >= 0 ? 1 : 0);
+        setRegister(0xF, xValue > yValue ? 1 : 0);
         return;
       case 6: // 8XY6 - stores the least significant bit of VX in VF and then shifts VX to the right by 1
         setRegister(0xF, yValue & 0x1);
@@ -452,7 +453,7 @@ class Chip8 {
       case 7: // 8XY7 - sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't
         final subtractedValue = yValue - xValue;
         setRegister(vx, subtractedValue);
-        setRegister(0xF, subtractedValue >= 0 ? 1 : 0);
+        setRegister(0xF, yValue > xValue ? 1 : 0);
         return;
       case 0xE: // 8XYE - stores the most significant bit of VX in VF and then shifts VX to the left by 1
         setRegister(0xF, yValue >> 7);

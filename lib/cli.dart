@@ -157,5 +157,10 @@ String printOpcode(int opcode) {
     final vx = secondSignificantNibble(opcode);
     return '${printBytes(opcode)} - adds V$vx to I';
   }
+  // 0xFx65
+  if (RegExp(r'^F[A-Z0-9]65$').hasMatch(opStr)) {
+    final vx = secondSignificantNibble(opcode);
+    return '${printBytes(opcode)} - fills V0 to V$vx inclusive with values stored starting at address I; I set to I+X+1 after operation';
+  }
   return '${printBytes(opcode)} - ??';
 }

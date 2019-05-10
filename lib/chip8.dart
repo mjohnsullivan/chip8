@@ -45,8 +45,8 @@ class Chip8 {
     if (x >= 64) x = x % 64;
     // Wrap drawing vertically if sprite overdraws at the bottom
     if (y >= 32) y = y % 32;
-    // Draw the pixel
-    display[(y * 64) + x] = value;
+    // Draw the pixel, by XORing the current display value to the new value
+    display[(y * 64) + x] = display[(y * 64) + x] != value;
   }
 
   /// Delay timer

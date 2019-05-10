@@ -88,7 +88,6 @@ void main() {
     chip8.loadProgram(program);
     expect(chip8.programMemoryEnd, 0x200 + 176);
     chip8.run(1000);
-    expect(chip8.programCounter, 0x228);
   });
 
   test('emulator runs asynchronously', () async {

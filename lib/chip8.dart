@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:chip8/bytes.dart';
 import 'package:chip8/font.dart';
+import 'package:chip8/clock/clock.dart';
 import 'package:chip8/utils.dart';
 
 final fontMemoryBase = 0;
@@ -11,7 +12,7 @@ final programMemoryBase = 0x200;
 class Chip8 {
   Chip8() {
     loadFonts();
-    _runTimer();
+    // _runTimer();
   }
 
   // 35 opcodes - each 2 bytes in length
@@ -115,17 +116,6 @@ class Chip8 {
     programMemoryEnd = programMemoryBase + program.length;
   }
 
-  void _runTimer() {
-    timerDriver = Timer.periodic(Duration(milliseconds: 1000 ~/ 60), (_) {
-      if (delayTimer > 0) --delayTimer;
-
-      if (soundTimer > 0) {
-        --soundTimer;
-        if (soundTimer == 0) print('BEEEEEP!');
-      }
-    });
-  }
-
   /// Executes the loaded program
   void run([int maxCycles]) {
     int cycle = 0;
@@ -142,7 +132,8 @@ class Chip8 {
     final completer = Completer<Null>();
     if (cycleTimer == null) {
       programCounter = programMemoryBase;
-      cycleTimer = Timer.periodic(Duration(milliseconds: 1), (_) {
+      // Chip8 clock speed at approximately 500Hz
+      cycleTimer = Timer.periodic(const Duration(milliseconds: 1), (_) {
         step();
         if (programCounter >= programMemoryEnd) {
           cycleTimer.cancel();
@@ -151,6 +142,32 @@ class Chip8 {
       });
     }
     return completer.future;
+  }
+
+  /// Stream fires an event at a rate of 60Hz. This loops
+  /// can be used to both execute ops and handle timers
+  void runStreamed() {
+    programCounter = programMemoryBase;
+    StreamSubscription<num> cpuStream;
+    // Execute on each clock cycle
+    cpuStream = eachFrame().transform(const ComputeFps()).listen((clockSpeed) {
+      // Execute 10 CPU instructions
+      for (int i = 0; i < 10; i++) {
+        step();
+        if (programCounter >= programMemoryEnd) {
+          cycleTimer.cancel();
+          cpuStream.cancel();
+        }
+      }
+      // Handle the delay and sound timers
+      if (delayTimer > 0) {
+        delayTimer--;
+      }
+      if (soundTimer > 0) {
+        soundTimer--;
+        if (soundTimer == 0) print('BEEEEEP!');
+      }
+    });
   }
 
   /// Execute a single CPU cycle
